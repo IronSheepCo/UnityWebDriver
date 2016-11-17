@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Net;
 
 namespace tech.ironsheep.WebDriver
 {
@@ -7,16 +8,25 @@ namespace tech.ironsheep.WebDriver
 	{
 		private static WebDriverManager _instance;
 
+		private static object instanceLock = new Object();
+
+		private HttpListener listener;
+
+
 		private WebDriverManager()
 		{
-			
+			listener = new HttpListener ();
+
+			listener.Prefixes.Add ("http://*:8080/");
+
+			listener.Start ();
 		}
 
 		public static WebDriverManager instance {
 			get{
 				if (_instance == null) 
 				{
-					lock (_instance) 
+					lock (instanceLock) 
 					{
 						if (_instance == null) 
 						{
