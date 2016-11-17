@@ -15,5 +15,9 @@ namespace tech.ironsheep.WebDriver
 		void Update () {
 		
 		}
+
+		void OnDestroy() {
+			WebDriverManager.instance.Shutdown ();
+		}
 	}
 }
