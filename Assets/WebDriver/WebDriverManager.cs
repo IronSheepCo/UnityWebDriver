@@ -27,6 +27,50 @@ namespace tech.ironsheep.WebDriver
 			StartWebDriver ();
 		}
 
+		private void WriteResponse( HttpListenerResponse response, string body, int code )
+		{
+			response.StatusCode = code;
+
+			var writer = new StreamWriter (response.OutputStream);
+			writer.Write (body);
+			writer.Close ();
+		}
+
+		private void RespondUnkownMethod( HttpListenerResponse response )
+		{
+			var responseBody = @"{
+				""error"":""unknown method"",
+				""message"":""method not defined for command"",
+				""stacktrace"":""""
+			}";
+
+			WriteResponse (response, responseBody, 405);
+		}
+
+		private void NewSession( string body, HttpListenerResponse response )
+		{
+			//session already started
+			if (sessionId != null) 
+			{
+				var responseBody = @"{
+					""error"":""session not created"",
+					""message"":""A session is already started"",
+					""stacktrace"":""""
+				}";
+
+				WriteResponse (response, responseBody, 500);
+
+				return;
+			}
+
+			//need to start a session
+			sessionId = System.Guid.NewGuid().ToString();
+
+			var reBody = string.Format( "{\"sessionId\":\"{0}\",\"capabilities\":\"\"}", sessionId);
+
+			WriteResponse (response, reBody, 200);
+		}
+
 		private void StartWebDriver()
 		{
 			listener.Start ();
@@ -49,21 +93,34 @@ namespace tech.ironsheep.WebDriver
 
 						switch( command ){
 						case "status":
+							switch( request.HttpMethod ){
+							case "GET":
+								break;
+							default:
+								RespondUnkownMethod( response );
+								break;
+							}
 							break;
 						case "session":
 							switch( args.Count() ){
 							case 0:
 								switch( request.HttpMethod ){
-								case "GET":
-									break;
-								case "DELETE":
+								case "POST":
+									NewSession( body, response );
 									break;
 								default:
-									
+									RespondUnkownMethod( response );
 									break;
 								}
 								break;
 							case 1:
+								if( request.HttpMethod == "DELETE" )
+								{
+								}
+								else
+								{
+									RespondUnkownMethod( response );
+								}
 								break;
 							default:
 								break;
