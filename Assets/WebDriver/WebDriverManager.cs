@@ -66,9 +66,35 @@ namespace tech.ironsheep.WebDriver
 			//need to start a session
 			sessionId = System.Guid.NewGuid().ToString();
 
-			var reBody = string.Format( "{\"sessionId\":\"{0}\",\"capabilities\":\"\"}", sessionId);
+			Debug.Log( string.Format("started session with id {0}", sessionId ) );
+				
+			var reBody = string.Format( "{{ \"sessionId\":\"{0}\",\"capabilities\":{{}} }}", sessionId);
 
 			WriteResponse (response, reBody, 200);
+		}
+
+		private void DeleteSession( string sessId, HttpListenerResponse response )
+		{
+			string responseBody;
+			
+			if (sessionId == null || sessionId != sessId) 
+			{
+				responseBody = @"{
+					""error"":""No session with that id""
+				}";
+
+				WriteResponse (response, responseBody, 400);
+
+				return;
+			}
+
+			responseBody = @"{
+				""data"":null
+			}";
+
+			sessionId = null;
+
+			WriteResponse (response, responseBody, 200);
 		}
 
 		private void RespondToStatus( string body, HttpListenerResponse response )
@@ -141,6 +167,9 @@ namespace tech.ironsheep.WebDriver
 							case 1:
 								if( request.HttpMethod == "DELETE" )
 								{
+									var sessionId = args[0];
+
+									DeleteSession( sessionId, response );
 								}
 								else
 								{
