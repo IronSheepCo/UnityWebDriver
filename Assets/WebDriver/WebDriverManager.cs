@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.IO;
+using System;
 
 namespace tech.ironsheep.WebDriver
 {
@@ -12,11 +13,13 @@ namespace tech.ironsheep.WebDriver
 	{
 		private static WebDriverManager _instance;
 
-		private static object instanceLock = new Object();
+		private static object instanceLock = new System.Object();
 
 		private HttpListener listener;
 
 		private string sessionId = null;
+
+		private Dictionary<string, Func<string, Array, HttpListenerResponse,bool> > commands;
 
 		private WebDriverManager()
 		{
@@ -126,6 +129,13 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, responseBody, 200);
 		}
 
+		private void CommandNotImplemented( string command, HttpListenerResponse response )
+		{
+			var responseBody = string.Format ("{{ \"error\":\"Command {0} not implemented \" }}", command);
+
+			WriteResponse (response, responseBody, 400);
+		}
+
 		private void StartWebDriver()
 		{
 			listener.Start ();
@@ -195,11 +205,29 @@ namespace tech.ironsheep.WebDriver
 									return;
 								}
 
+								//search if someone registered a handle for 
+								//the command
+								args = args.Skip(1).ToArray();
+
+								var realCommand = args[0];
+
+								if( commands.ContainsKey( realCommand ) )
+								{
+									var registeredCommand = commands[ realCommand ];
+
+									registeredCommand( body, args.Skip(1).ToArray(), response );
+								}
+								else
+								{
+									CommandNotImplemented( realCommand, response );
+								}
+
 								break;
 							}
 							break;
 						default:
-								break;
+							CommandNotImplemented( command, response );
+							break;
 						}
 					});
 				}
