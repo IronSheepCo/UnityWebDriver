@@ -113,7 +113,7 @@ namespace tech.ironsheep.WebDriver
 
 						var body = new StreamReader( request.InputStream ).ReadToEnd();
 
-						var args = request.Url.Segments.Skip(2);
+						var args = request.Url.Segments.Skip(2).ToArray<string>();
 
 						switch( command ){
 						case "status":
