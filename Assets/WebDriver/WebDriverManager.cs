@@ -47,6 +47,15 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, responseBody, 405);
 		}
 
+		private void BadSessionId( string body, HttpListenerResponse response )
+		{
+			string responseBody = @"{
+					""error"":""No session with that id""
+				}";
+
+			WriteResponse (response, responseBody, 400);
+		}
+
 		private void NewSession( string body, HttpListenerResponse response )
 		{
 			//session already started
@@ -79,11 +88,7 @@ namespace tech.ironsheep.WebDriver
 			
 			if (sessionId == null || sessionId != sessId) 
 			{
-				responseBody = @"{
-					""error"":""No session with that id""
-				}";
-
-				WriteResponse (response, responseBody, 400);
+				BadSessionId ("", response);
 
 				return;
 			}
@@ -177,6 +182,19 @@ namespace tech.ironsheep.WebDriver
 								}
 								break;
 							default:
+								//other commands over here
+
+								//getting the session id here
+								//if not a match return error
+								var reqSessId = args[0];
+
+								if( reqSessId != sessionId )
+								{
+									BadSessionId(body, response);
+
+									return;
+								}
+
 								break;
 							}
 							break;
