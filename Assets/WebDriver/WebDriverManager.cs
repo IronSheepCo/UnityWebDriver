@@ -39,7 +39,7 @@ namespace tech.ironsheep.WebDriver
 			writer.Close ();
 		}
 
-		private void RespondUnkownMethod( HttpListenerResponse response )
+		public void RespondUnkownMethod( HttpListenerResponse response )
 		{
 			var responseBody = @"{
 				""error"":""unknown method"",
