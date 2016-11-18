@@ -71,6 +71,30 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, reBody, 200);
 		}
 
+		private void RespondToStatus( string body, HttpListenerResponse response )
+		{
+			string responseBody;
+
+			if (sessionId != null) 
+			{
+				responseBody = @"{
+					""ready"":false,
+					""message"":""A session is already opened""
+				}";
+
+				WriteResponse (response, responseBody, 400);
+
+				return;
+			}
+
+			responseBody = @"{
+				""ready"":true,
+				""message"":""Ready for session""
+			}";
+
+			WriteResponse (response, responseBody, 200);
+		}
+
 		private void StartWebDriver()
 		{
 			listener.Start ();
@@ -95,6 +119,7 @@ namespace tech.ironsheep.WebDriver
 						case "status":
 							switch( request.HttpMethod ){
 							case "GET":
+								RespondToStatus( body, response );
 								break;
 							default:
 								RespondUnkownMethod( response );
