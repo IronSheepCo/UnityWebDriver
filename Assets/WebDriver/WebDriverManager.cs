@@ -19,7 +19,7 @@ namespace tech.ironsheep.WebDriver
 
 		private string sessionId = null;
 
-		private Dictionary<string, Func<string, Array, HttpListenerResponse,bool> > commands;
+		private Dictionary<string, Func<string, Array, HttpListenerResponse, bool> > commands = new Dictionary<string, Func<string, Array, HttpListenerResponse, bool>>();
 
 		private WebDriverManager()
 		{
@@ -232,6 +232,11 @@ namespace tech.ironsheep.WebDriver
 					});
 				}
 			});
+		}
+
+		public void RegisterCommand( string command, Func<string, Array, HttpListenerResponse, bool> callback )
+		{
+			commands [command] = callback;
 		}
 
 		public static WebDriverManager instance {
