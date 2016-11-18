@@ -198,7 +198,7 @@ namespace tech.ironsheep.WebDriver
 								//if not a match return error
 								var reqSessId = args[0];
 
-								if( reqSessId != sessionId )
+								if( reqSessId.Equals(sessionId) == false )
 								{
 									BadSessionId(body, response);
 
