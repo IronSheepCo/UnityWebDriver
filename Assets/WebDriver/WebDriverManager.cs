@@ -154,7 +154,7 @@ namespace tech.ironsheep.WebDriver
 
 						var body = new StreamReader( request.InputStream ).ReadToEnd();
 
-						var args = request.Url.Segments.Skip(2).ToArray<string>();
+						var args = request.Url.Segments.Skip(2).Select( x => x.Replace("/","") ).ToArray<string>();
 
 						switch( command ){
 						case "status":
