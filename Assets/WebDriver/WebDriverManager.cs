@@ -234,6 +234,17 @@ namespace tech.ironsheep.WebDriver
 			});
 		}
 
+		public void InvalidArgument(HttpListenerResponse response)
+		{
+			var responseBody =  @"{
+					""error"":""invalid argument"",
+					""message"":""Invalid argument"",
+					""stacktrace"":""""
+				}";
+
+			WriteResponse (response, responseBody, 400);
+		}
+
 		public void RegisterCommand( string command, Func<string, Array, HttpListenerResponse, bool> callback )
 		{
 			commands [command] = callback;
