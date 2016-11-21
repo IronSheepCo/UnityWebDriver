@@ -10,12 +10,12 @@ namespace tech.ironsheep.WebDriver
 
 		public static void Init()
 		{
-			WebDriverManager.instance.RegisterCommand ("element", FindElement);
+			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElement);
 		}
 
-		public static bool FindElement( string body, Array args, HttpListenerResponse response )
+		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
 		{
-			Debug.Log (args);
+			var findBody = SimpleJSON.JSON.Parse (body);
 
 			return true;
 		}
