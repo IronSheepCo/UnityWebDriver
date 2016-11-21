@@ -39,6 +39,11 @@ namespace tech.ironsheep.WebDriver
 			writer.Close ();
 		}
 
+		public void WriteEmptyAlgorithmResponse( HttpListenerResponse response )
+		{
+			WriteResponse( response, "{\"data\":null}", 200 );
+		}
+
 		public void RespondUnkownMethod( HttpListenerResponse response )
 		{
 			var responseBody = @"{
