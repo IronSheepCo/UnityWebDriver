@@ -30,7 +30,7 @@ namespace tech.ironsheep.WebDriver
 			StartWebDriver ();
 		}
 
-		private void WriteResponse( HttpListenerResponse response, string body, int code )
+		public void WriteResponse( HttpListenerResponse response, string body, int code )
 		{
 			response.StatusCode = code;
 
