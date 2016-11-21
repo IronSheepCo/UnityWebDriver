@@ -41,7 +41,7 @@ namespace tech.ironsheep.WebDriver
 			if (findBody.locationStrategy != "css selector" && findBody.locationStrategy != "xpath") 
 			{
 				//return an empty set
-				WebDriverManager.instance.WriteResponse( response, "{\"data\":null}", 200 );
+				WebDriverManager.instance.WriteEmptyAlgorithmResponse( response );
 				return null;
 			}
 
@@ -55,6 +55,9 @@ namespace tech.ironsheep.WebDriver
 			{
 				return true;
 			}
+
+			//return an empty set
+			WebDriverManager.instance.WriteEmptyAlgorithmResponse( response );
 
 			return true;
 		}
