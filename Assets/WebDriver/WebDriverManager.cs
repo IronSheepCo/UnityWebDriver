@@ -19,7 +19,7 @@ namespace tech.ironsheep.WebDriver
 
 		private string sessionId = null;
 
-		private Dictionary<string, Func<string, Array, HttpListenerResponse, bool> > commands = new Dictionary<string, Func<string, Array, HttpListenerResponse, bool>>();
+		private Dictionary< string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > > commands = new Dictionary< string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > >();
 
 		private WebDriverManager()
 		{
@@ -213,9 +213,16 @@ namespace tech.ironsheep.WebDriver
 
 								if( commands.ContainsKey( realCommand ) )
 								{
-									var registeredCommand = commands[ realCommand ];
+									if( commands[ realCommand ].ContainsKey( request.HttpMethod ) )
+									{
+										var registeredCommand = commands[ realCommand ][ request.HttpMethod ];
 
-									registeredCommand( body, args.Skip(1).ToArray(), response );
+										registeredCommand( body, args.Skip(1).ToArray(), response );
+									}
+									else
+									{
+										RespondUnkownMethod( response );
+									}
 								}
 								else
 								{
@@ -245,9 +252,14 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, responseBody, 400);
 		}
 
-		public void RegisterCommand( string command, Func<string, Array, HttpListenerResponse, bool> callback )
+		public void RegisterCommand( string command, string httpMethod, Func<string, string[], HttpListenerResponse, bool> callback )
 		{
-			commands [command] = callback;
+			if (commands.ContainsKey (command) == false) 
+			{
+				commands [command] = new Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > ();
+			}
+
+			commands [command][httpMethod] = callback;
 		}
 
 		public static WebDriverManager instance {
