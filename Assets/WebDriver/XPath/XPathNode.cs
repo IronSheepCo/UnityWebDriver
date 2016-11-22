@@ -12,8 +12,8 @@ namespace tech.ironsheep.WebDriver.XPath
 		//of the current node
 		public bool IsChild;
 
-		//attributes that need to match for the
+		//predicates that need to match for the
 		//current segment of the path
-		public List<XPathAttribute> attributes = new List<XPathAttribute>();
+		public List<XPathPredicate> predicates = new List<XPathPredicate>();
 	}
 }
