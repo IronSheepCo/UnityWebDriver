@@ -9,6 +9,13 @@ namespace tech.ironsheep.WebDriver.Tests
 
 		// Use this for initialization
 		void Start () {
+			ParserTests ();
+		}
+
+		private void ParserTests()
+		{
+			Debug.Log ("starting parser tests");
+
 			var parser = new XPathParser ();
 
 			var results = parser.Parse ("books");
@@ -87,7 +94,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert ((results [1].predicates[1] as XPathAttribute).Name == "lang");
 			Debug.Assert ((results [1].predicates[1] as XPathAttribute).ValueToMatch == "en");
 
-			Debug.Log ("tests done");
+			Debug.Log ("end parser test");
 		}
 		
 		// Update is called once per frame
