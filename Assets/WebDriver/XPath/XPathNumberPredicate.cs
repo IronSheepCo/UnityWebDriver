@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 namespace tech.ironsheep.WebDriver.XPath
@@ -7,7 +8,7 @@ namespace tech.ironsheep.WebDriver.XPath
 	{
 		public int Number;
 
-		override public List<GameObject> Evaluate( List<GameObject> nodeList, string scriptName )
+		override public List<GameObject> Evaluate( List<GameObject> nodeList, Type componentType )
 		{
 			if (nodeList.Count <= Number) 
 			{

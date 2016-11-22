@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 namespace tech.ironsheep.WebDriver.XPath
@@ -15,7 +16,7 @@ namespace tech.ironsheep.WebDriver.XPath
 		//attribute Name
 		public string ValueToMatch;
 
-		override public List<GameObject> Evaluate( List<GameObject> set, string scriptName )
+		override public List<GameObject> Evaluate( List<GameObject> set, Type componentType )
 		{
 			return set;
 		}
