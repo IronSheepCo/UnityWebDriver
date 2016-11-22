@@ -1,7 +1,9 @@
-﻿
+﻿using UnityEngine;
+using System.Collections.Generic;
+
 namespace tech.ironsheep.WebDriver.XPath
 {
-	public class XPathAttribute
+	public class XPathAttribute: XPathPredicate
 	{
 		//The name of the attribute
 		public string Name;
@@ -12,5 +14,10 @@ namespace tech.ironsheep.WebDriver.XPath
 		//if null then we test for the existence of
 		//attribute Name
 		public string ValueToMatch;
+
+		override public List<GameObject> Evaluate( List<GameObject> set, string scriptName )
+		{
+			return set;
+		}
 	}
 }
