@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 
 namespace tech.ironsheep.WebDriver.XPath
@@ -17,6 +18,28 @@ namespace tech.ironsheep.WebDriver.XPath
 
 		//next set of parsing nodes
 		private List<GameObject> nextSet = new List<GameObject> ();
+
+		private List<Assembly> assemblies = new List<Assembly> ();
+
+		public XPathParser()
+		{
+			//get all assemblies
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies ();
+
+			//only use UnityEngine
+			//and C# assemblies
+			foreach (var ass in assemblies) 
+			{
+				string name = ass.GetName().Name;
+
+				if (name == "UnityEngine" ||
+					name == "UnityEngine.UI" ||
+				   name == "Assembly-CSharp-firstpass") 
+				{
+					this.assemblies.Add (ass);
+				}
+			}
+		}
 
 		public List<XPathNode> Parse( string xPath )
 		{
@@ -123,6 +146,61 @@ namespace tech.ironsheep.WebDriver.XPath
 		//Evaluates the xpath expression in the context of root
 		public List<GameObject> Evaluate( string xPath, GameObject root )
 		{
+			steps = Parse (xPath);
+
+			currentSet = new List<GameObject> ();
+			currentSet.Add (root);
+
+			//evaluate each steps in the current context
+			foreach (var step in steps) 
+			{
+				nextSet = new List<GameObject> ();
+				
+				foreach (var node in currentSet) 
+				{
+					//get the type for the current tag
+					Type nodeType = FindType( step.TagName );
+
+					//couldn't find the type for this node
+					//return null
+					if (nodeType == null) 
+					{
+						return new List<GameObject> ();
+					}
+
+					if (step.IsChild) 
+					{
+						//look for tag name in children	
+
+					} 
+					else 
+					{
+						//look for tag name in all descendents
+					}
+				}
+
+				currentSet = nextSet;
+			}
+
+			return currentSet;
+		}
+
+		public Type FindType( string className )
+		{
+			string lower = className.ToLower ();
+
+			//search all assemblies
+			foreach (var assembly in assemblies) 
+			{
+				foreach (var t in assembly.GetTypes ()) 
+				{
+					if (t.Name.ToLower() == lower) 
+					{
+						return t;
+					}
+				}
+			}
+
 			return null;
 		}
 	}
