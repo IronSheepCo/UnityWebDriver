@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Reflection;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace tech.ironsheep.WebDriver.XPath
@@ -168,14 +169,43 @@ namespace tech.ironsheep.WebDriver.XPath
 						return new List<GameObject> ();
 					}
 
+					List<Component> results = new List<Component>();
+
 					if (step.IsChild) 
 					{
 						//look for tag name in children	
+						for( int i = 0; i < node.transform.childCount; i++ )
+						{
+							var child = node.transform.GetChild (i).gameObject;
 
+							var component = child.GetComponent (nodeType);
+
+							if (component != null) 
+							{
+								results.Add (component);
+							}
+						}
 					} 
 					else 
 					{
 						//look for tag name in all descendents
+						var res = node.GetComponentsInChildren( nodeType );
+
+						if( res != null )
+						{
+							results = res.ToList();
+						}
+					}
+
+					foreach (var comp in results) 
+					{
+						nextSet.Add (comp.gameObject);	
+					}
+
+					//need to use the predicates
+					foreach (var predicate in step.predicates) 
+					{
+						nextSet = predicate.Evaluate (nextSet, nodeType);
 					}
 				}
 
