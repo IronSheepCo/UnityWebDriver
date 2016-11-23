@@ -141,7 +141,7 @@ namespace tech.ironsheep.WebDriver.XPath
 			return ret;
 		}
 
-		private List<GameObject> EvaluateStep( XPathNode step, List<GameObject> nodeSet )
+		private List<GameObject> EvaluateStep( XPathNode step, List<GameObject> nodeSet, bool treatChildAsSelf = false )
 		{
 			List<GameObject> ret = new List<GameObject> ();
 
@@ -161,16 +161,26 @@ namespace tech.ironsheep.WebDriver.XPath
 
 				if (step.IsChild) 
 				{
-					//look for tag name in children	
-					for( int i = 0; i < node.transform.childCount; i++ )
+					if (treatChildAsSelf) 
 					{
-						var child = node.transform.GetChild (i).gameObject;
-
-						var component = child.GetComponent (nodeType);
+						var component = node.gameObject.GetComponent (nodeType);
 
 						if (component != null) 
 						{
 							results.Add (component);
+						}
+					} 
+					else 
+					{
+						//look for tag name in children	
+						for (int i = 0; i < node.transform.childCount; i++) {
+							var child = node.transform.GetChild (i).gameObject;
+
+							var component = child.GetComponent (nodeType);
+
+							if (component != null) {
+								results.Add (component);
+							}
 						}
 					}
 				} 
@@ -210,6 +220,15 @@ namespace tech.ironsheep.WebDriver.XPath
 
 			//need to take care of some steps if
 			//we have an absolute path
+			if (steps [0].IsChild) 
+			{
+				var step = steps [0];
+
+				currentSet = EvaluateStep (step, currentSet, true);
+
+				//removing the first step
+				steps.Remove (step);
+			}
 
 			//evaluate each steps in the current context
 			foreach (var step in steps) 
