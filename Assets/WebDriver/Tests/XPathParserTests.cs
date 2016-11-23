@@ -106,10 +106,15 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			GameObject root = GameObject.Find ("/TestText");
 
-			var results = parser.Evaluate ("//button", root);
+			var results = parser.Evaluate ("/button", root);
 
 			Debug.Assert (results.Count == 1);
 			Debug.Assert (results[0].name == "TestText");
+
+			results = parser.Evaluate ("//button//text", root);
+
+			Debug.Assert (results.Count == 1);
+			Debug.Assert (results[0].name == "Text");
 
 			Debug.Log ("end evaluate test");
 		}
