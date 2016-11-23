@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 
 namespace tech.ironsheep.WebDriver.XPath
@@ -18,7 +20,56 @@ namespace tech.ironsheep.WebDriver.XPath
 
 		override public List<GameObject> Evaluate( List<GameObject> set, Type componentType )
 		{
-			return set;
+			if (ValueToMatch == null) 
+			{
+				return EvaluateNonNull (set, componentType);
+			}
+
+			//special attribute
+			//we look for this on the game object itself
+			//and not the component
+			if (Name == "name") 
+			{
+				return EvaluateName (set);
+			}
+
+			return null;
+		}
+
+		private List<GameObject> EvaluateName( List<GameObject> set )
+		{
+			return set.Where (go => go.name == ValueToMatch).ToList();
+		}
+
+		private List<GameObject> EvaluateNonNull( List<GameObject> set, Type componentType )
+		{
+			List<GameObject> filtered = new List<GameObject> ();
+
+			foreach (var go in set) 
+			{
+				Component comp = go.GetComponent (componentType);
+
+				if (comp == null) 
+				{
+					continue;
+				}
+
+				//looking into properties
+				if (componentType.GetProperty (Name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase ) != null) 
+				{
+					filtered.Add (go);
+					continue;
+				}
+
+				//looking int fields
+				if (componentType.GetField (Name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase) != null) 
+				{
+					filtered.Add (go);
+					continue;
+				}
+			}
+
+			return filtered;
 		}
 
 		public static XPathAttribute fromString( string data )
