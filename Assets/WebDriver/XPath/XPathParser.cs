@@ -192,6 +192,12 @@ namespace tech.ironsheep.WebDriver.XPath
 					if( res != null )
 					{
 						results = res.ToList();
+
+						//remove self from the list
+						if (!treatChildAsSelf && node.GetComponent (nodeType)) 
+						{
+							results.Remove (node.GetComponent (nodeType));
+						}
 					}
 				}
 
@@ -218,17 +224,15 @@ namespace tech.ironsheep.WebDriver.XPath
 			currentSet = new List<GameObject> ();
 			currentSet.Add (root);
 
-			//need to take care of some steps if
-			//we have an absolute path
-			if (steps [0].IsChild) 
-			{
-				var step = steps [0];
+			//need to do things a little
+			//bit different for the first 
+			//step
+			var firstStep = steps [0];
 
-				currentSet = EvaluateStep (step, currentSet, true);
+			currentSet = EvaluateStep (firstStep, currentSet, true);
 
-				//removing the first step
-				steps.Remove (step);
-			}
+			//removing the first step
+			steps.Remove (firstStep);
 
 			//evaluate each steps in the current context
 			foreach (var step in steps) 
