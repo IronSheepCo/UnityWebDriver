@@ -33,7 +33,55 @@ namespace tech.ironsheep.WebDriver.XPath
 				return EvaluateName (set);
 			}
 
-			return null;
+			//we need the attribute to match 
+			//ValueToMatch
+			return EvaluateAttribute( set, componentType );
+		}
+
+		private List<GameObject> EvaluateAttribute( List<GameObject> set, Type componentType )
+		{
+			List<GameObject> filtered = new List<GameObject> ();
+
+			foreach (var go in set) 
+			{
+				Component comp = go.GetComponent (componentType);
+
+				if (comp == null) 
+				{
+					//could not find a component
+					//pass on
+					continue;
+				}
+
+				//looking into properties
+				PropertyInfo propertyInfo = componentType.GetProperty (Name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase );
+
+				if ( propertyInfo != null) 
+				{
+					if (ValueToMatch == propertyInfo.GetValue (comp, null).ToString()) 
+					{
+						filtered.Add (go);
+					}
+
+					continue;
+				}
+
+				//looking into fields
+				FieldInfo fieldInfo = componentType.GetField (Name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase );
+
+				if ( fieldInfo != null) 
+				{
+					if (ValueToMatch == fieldInfo.GetValue (comp).ToString()) 
+					{
+						filtered.Add (go);
+					}
+
+					continue;
+				}
+
+			}
+
+			return filtered;
 		}
 
 		private List<GameObject> EvaluateName( List<GameObject> set )
@@ -51,6 +99,8 @@ namespace tech.ironsheep.WebDriver.XPath
 
 				if (comp == null) 
 				{
+					//could not find a component
+					//pass on
 					continue;
 				}
 
