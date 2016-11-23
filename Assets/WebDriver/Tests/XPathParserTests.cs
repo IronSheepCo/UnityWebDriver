@@ -116,6 +116,47 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (results.Count == 1);
 			Debug.Assert (results[0].name == "Text");
 
+			results = parser.Evaluate ("/text", root);
+
+			Debug.Assert (results.Count == 0);
+
+			results = parser.Evaluate ("//text[@text]", root);
+
+			Debug.Assert (results.Count == 1);
+			Debug.Assert (results[0].name == "Text");
+
+			results = parser.Evaluate ("/button[@text]", root);
+
+			Debug.Assert (results.Count == 0);
+
+			results = parser.Evaluate ("/button[@interactable]", root);
+
+			Debug.Assert (results.Count == 1);
+			Debug.Assert (results[0].name == "TestText");
+
+			results = parser.Evaluate ("button", root);
+
+			Debug.Assert (results.Count == 3);
+
+			results = parser.Evaluate ("//button[@name=\"Second\"]", root);
+
+			Debug.Assert (results.Count == 1);
+			Debug.Assert (results[0].name == "Second");
+
+			results = parser.Evaluate ("//button[@interactable=\"False\"]", root);
+
+			Debug.Assert (results.Count == 1);
+			Debug.Assert (results[0].name == "Third");
+
+			results = parser.Evaluate ("//text[@text=\"some text overhere\"]", root);
+
+			Debug.Assert (results.Count == 1);
+			Debug.Assert (results[0].name == "Text");
+
+			results = parser.Evaluate ("/button//button", root);
+
+			Debug.Assert (results.Count == 2);
+
 			Debug.Log ("end evaluate test");
 		}
 		
