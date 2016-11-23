@@ -17,9 +17,6 @@ namespace tech.ironsheep.WebDriver.XPath
 		//current node set Evaluate is working on
 		private List<GameObject> currentSet = new List<GameObject> ();
 
-		//next set of parsing nodes
-		private List<GameObject> nextSet = new List<GameObject> ();
-
 		private List<Assembly> assemblies = new List<Assembly> ();
 
 		public XPathParser()
@@ -144,6 +141,65 @@ namespace tech.ironsheep.WebDriver.XPath
 			return ret;
 		}
 
+		private List<GameObject> EvaluateStep( XPathNode step, List<GameObject> nodeSet )
+		{
+			List<GameObject> ret = new List<GameObject> ();
+
+			foreach (var node in nodeSet) 
+			{
+				//get the type for the current tag
+				Type nodeType = FindType( step.TagName );
+
+				//couldn't find the type for this node
+				//return null
+				if (nodeType == null) 
+				{
+					return new List<GameObject> ();
+				}
+
+				List<Component> results = new List<Component>();
+
+				if (step.IsChild) 
+				{
+					//look for tag name in children	
+					for( int i = 0; i < node.transform.childCount; i++ )
+					{
+						var child = node.transform.GetChild (i).gameObject;
+
+						var component = child.GetComponent (nodeType);
+
+						if (component != null) 
+						{
+							results.Add (component);
+						}
+					}
+				} 
+				else 
+				{
+					//look for tag name in all descendents
+					var res = node.GetComponentsInChildren( nodeType );
+
+					if( res != null )
+					{
+						results = res.ToList();
+					}
+				}
+
+				foreach (var comp in results) 
+				{
+					ret.Add (comp.gameObject);	
+				}
+
+				//need to use the predicates
+				foreach (var predicate in step.predicates) 
+				{
+					ret = predicate.Evaluate (ret, nodeType);
+				}
+			}
+
+			return ret;
+		}
+
 		//Evaluates the xpath expression in the context of root
 		public List<GameObject> Evaluate( string xPath, GameObject root )
 		{
@@ -152,64 +208,13 @@ namespace tech.ironsheep.WebDriver.XPath
 			currentSet = new List<GameObject> ();
 			currentSet.Add (root);
 
+			//need to take care of some steps if
+			//we have an absolute path
+
 			//evaluate each steps in the current context
 			foreach (var step in steps) 
 			{
-				nextSet = new List<GameObject> ();
-				
-				foreach (var node in currentSet) 
-				{
-					//get the type for the current tag
-					Type nodeType = FindType( step.TagName );
-
-					//couldn't find the type for this node
-					//return null
-					if (nodeType == null) 
-					{
-						return new List<GameObject> ();
-					}
-
-					List<Component> results = new List<Component>();
-
-					if (step.IsChild) 
-					{
-						//look for tag name in children	
-						for( int i = 0; i < node.transform.childCount; i++ )
-						{
-							var child = node.transform.GetChild (i).gameObject;
-
-							var component = child.GetComponent (nodeType);
-
-							if (component != null) 
-							{
-								results.Add (component);
-							}
-						}
-					} 
-					else 
-					{
-						//look for tag name in all descendents
-						var res = node.GetComponentsInChildren( nodeType );
-
-						if( res != null )
-						{
-							results = res.ToList();
-						}
-					}
-
-					foreach (var comp in results) 
-					{
-						nextSet.Add (comp.gameObject);	
-					}
-
-					//need to use the predicates
-					foreach (var predicate in step.predicates) 
-					{
-						nextSet = predicate.Evaluate (nextSet, nodeType);
-					}
-				}
-
-				currentSet = nextSet;
+				currentSet = EvaluateStep( step, currentSet );
 			}
 
 			return currentSet;
