@@ -10,6 +10,7 @@ namespace tech.ironsheep.WebDriver.Tests
 		// Use this for initialization
 		void Start () {
 			ParserTests ();
+			ParserEvaluateTest ();
 		}
 
 		private void ParserTests()
@@ -95,6 +96,22 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert ((results [1].predicates[1] as XPathAttribute).ValueToMatch == "en");
 
 			Debug.Log ("end parser test");
+		}
+
+		private void ParserEvaluateTest()
+		{
+			Debug.Log ("start evaluate test");
+
+			var parser = new XPathParser ();
+
+			GameObject root = GameObject.Find ("/TestText");
+
+			var results = parser.Evaluate ("//button", root);
+
+			Debug.Assert (results.Count == 1);
+			Debug.Assert (results[0].name == "TestText");
+
+			Debug.Log ("end evaluate test");
 		}
 		
 		// Update is called once per frame
