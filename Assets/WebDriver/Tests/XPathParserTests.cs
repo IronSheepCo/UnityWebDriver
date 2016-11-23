@@ -19,6 +19,8 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			var parser = new XPathParser ();
 
+			float startTime = Time.realtimeSinceStartup;
+
 			var results = parser.Parse ("books");
 
 			Debug.Assert (results.Count == 1);
@@ -95,6 +97,8 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert ((results [1].predicates[1] as XPathAttribute).Name == "lang");
 			Debug.Assert ((results [1].predicates[1] as XPathAttribute).ValueToMatch == "en");
 
+			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
+
 			Debug.Log ("end parser test");
 		}
 
@@ -103,6 +107,8 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Log ("start evaluate test");
 
 			var parser = new XPathParser ();
+
+			float startTime = Time.realtimeSinceStartup;
 
 			GameObject root = GameObject.Find ("/TestText");
 
@@ -156,6 +162,8 @@ namespace tech.ironsheep.WebDriver.Tests
 			results = parser.Evaluate ("/button//button", root);
 
 			Debug.Assert (results.Count == 2);
+
+			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end evaluate test");
 		}
