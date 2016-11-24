@@ -39,8 +39,8 @@ namespace tech.ironsheep.WebDriver
 				return null;
 			}
 
-			//we only support 'css selector' and 'xpath' strategies
-			if (findBody.locationStrategy != "css selector" && findBody.locationStrategy != "xpath") 
+			//we only support 'xpath' strategy
+			if (findBody.locationStrategy != "xpath") 
 			{
 				//return an empty set
 				WebDriverManager.instance.WriteEmptyAlgorithmResponse( response );
