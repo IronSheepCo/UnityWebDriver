@@ -19,7 +19,11 @@ namespace tech.ironsheep.WebDriver
 
 		private string sessionId = null;
 
-		private Dictionary< string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > > commands = new Dictionary< string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > >();
+		private Dictionary<string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > > commands = new Dictionary< string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > >();
+
+		//current browsing context
+		//hash from uuid to GameObject
+		private Dictionary<string, GameObject> browsingContext = new Dictionary<string, GameObject>();
 
 		private WebDriverManager()
 		{
