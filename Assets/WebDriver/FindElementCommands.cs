@@ -5,6 +5,7 @@ using System.Net;
 using System;
 
 using tech.ironsheep.WebDriver.Command;
+using tech.ironsheep.WebDriver.XPath;
 
 namespace tech.ironsheep.WebDriver
 {
@@ -12,6 +13,8 @@ namespace tech.ironsheep.WebDriver
 
 		//<see href="https://w3c.github.io/webdriver/webdriver-spec.html#dfn-web-element-identifier" />
 		private static string WebElementIdentifierKey = "element-6066-11e4-a52e-4f735466cecf";
+
+		private static XPathParser parser = new XPathParser();
 
 		public static void Init()
 		{
@@ -27,6 +30,26 @@ namespace tech.ironsheep.WebDriver
 			}";
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 400);
+		}
+
+		private static void WriteElementList( HttpListenerResponse response, List<string> results )
+		{
+			string responseBody = "{ \"data\":[";
+
+			var first = results [0];
+
+			responseBody += first;
+
+			results.Remove (first);
+
+			foreach (var json in results) 
+			{
+				responseBody += ", \n" + json;
+			}
+
+			responseBody += "] }";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 		}
 
 		private static Command.FindBody ParseFindElementBody( string body, HttpListenerResponse response )
@@ -67,13 +90,46 @@ namespace tech.ironsheep.WebDriver
 
 		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
 		{
-			if (ParseFindElementBody (body, response) == null) 
+			FindBody findRequest = ParseFindElementBody (body, response);
+
+			if ( findRequest == null) 
 			{
 				return true;
 			}
 
-			//return an empty set
-			WebDriverManager.instance.WriteEmptyAlgorithmResponse( response );
+			List<GameObject> found = new List<GameObject> ();
+
+			//need to go use all root objects
+			//as context
+			foreach (var rgo in WebDriverManager.instance.RootGameObjects) 
+			{
+				found.AddRange( parser.Evaluate (findRequest.selector, rgo) );
+			}
+
+			//no results found
+			if (found.Count == 0) 
+			{
+				WriteElementNotFound (response);
+
+				return true;
+			}
+
+			List<string> objs = new List<string> ();
+
+			//we have results, lets 
+			//add them to context
+			foreach (var go in found) 
+			{
+				string uuid = System.Guid.NewGuid ().ToString ();
+
+				WebDriverManager.instance.AddElement (go, uuid);
+
+				string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", go.name, WebElementIdentifierKey, uuid);
+
+				objs.Add (jsonRepr);
+			}
+
+			WriteElementList (response, objs);
 
 			return true;
 		}
