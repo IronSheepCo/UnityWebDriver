@@ -19,6 +19,7 @@ namespace tech.ironsheep.WebDriver
 		public static void Init()
 		{
 			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElement);
+			WebDriverManager.instance.RegisterCommand ("elements", "POST", FindElements);
 		}
 
 		private static void WriteElementNotFound( HttpListenerResponse response )
@@ -30,6 +31,15 @@ namespace tech.ironsheep.WebDriver
 			}";
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 400);
+		}
+
+		private static void WriteEmptyResult( HttpListenerResponse response )
+		{
+			var responseBody = @"{
+				""data"":[]
+			}";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 		}
 
 		private static void WriteElementList( HttpListenerResponse response, List<string> results )
@@ -97,41 +107,85 @@ namespace tech.ironsheep.WebDriver
 				return true;
 			}
 
-			List<GameObject> found = new List<GameObject> ();
+			GameObject found = null;
 
 			//need to go use all root objects
 			//as context
 			foreach (var rgo in WebDriverManager.instance.RootGameObjects) 
 			{
-				found.AddRange( parser.Evaluate (findRequest.selector, rgo) );
+				var resp = parser.Evaluate (findRequest.selector, rgo);
+
+				if (resp.Count != 0) 
+				{
+					found = resp [0];
+					break;
+				}
+
 			}
 
 			//no results found
-			if (found.Count == 0) 
+			if (found == null) 
 			{
 				WriteElementNotFound (response);
 
 				return true;
 			}
 
-			List<string> objs = new List<string> ();
+			string uuid = System.Guid.NewGuid ().ToString ();
 
-			//we have results, lets 
-			//add them to context
-			foreach (var go in found) 
-			{
-				string uuid = System.Guid.NewGuid ().ToString ();
+			WebDriverManager.instance.AddElement (found, uuid);
 
-				WebDriverManager.instance.AddElement (go, uuid);
+			string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", found.name, WebElementIdentifierKey, uuid);
 
-				string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", go.name, WebElementIdentifierKey, uuid);
-
-				objs.Add (jsonRepr);
-			}
-
-			WriteElementList (response, objs);
+			WriteElementList (response, new List<string>{ jsonRepr });
 
 			return true;
 		}
+
+		public static bool FindElements( string body, string[] args, HttpListenerResponse response )
+			{
+				FindBody findRequest = ParseFindElementBody (body, response);
+
+				if ( findRequest == null) 
+				{
+					return true;
+				}
+
+				List<GameObject> found = new List<GameObject> ();
+
+				//need to go use all root objects
+				//as context
+				foreach (var rgo in WebDriverManager.instance.RootGameObjects) 
+				{
+					found.AddRange( parser.Evaluate (findRequest.selector, rgo) );
+				}
+
+				//no results found
+				if (found.Count == 0) 
+				{
+					WriteEmptyResult (response);
+
+					return true;
+				}
+
+				List<string> objs = new List<string> ();
+
+				//we have results, lets 
+				//add them to context
+				foreach (var go in found) 
+				{
+					string uuid = System.Guid.NewGuid ().ToString ();
+
+					WebDriverManager.instance.AddElement (go, uuid);
+
+					string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", go.name, WebElementIdentifierKey, uuid);
+
+					objs.Add (jsonRepr);
+				}
+
+				WriteElementList (response, objs);
+
+				return true;
+			}
 	}
 }
