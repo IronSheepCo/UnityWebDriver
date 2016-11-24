@@ -25,6 +25,7 @@ namespace tech.ironsheep.WebDriver
 				findBody.locationStrategy = parsedBody ["using"];
 			}
 			catch( Exception e ) {
+				Debug.Log (e);
 				WebDriverManager.instance.InvalidArgument (response);
 				return null;
 			}
@@ -33,6 +34,7 @@ namespace tech.ironsheep.WebDriver
 				findBody.selector = parsedBody ["value"];
 			}
 			catch(Exception e ){
+				Debug.Log (e);
 				WebDriverManager.instance.InvalidArgument (response);
 				return null;
 			}
