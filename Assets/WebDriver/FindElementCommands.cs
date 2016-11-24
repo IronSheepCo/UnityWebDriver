@@ -15,6 +15,17 @@ namespace tech.ironsheep.WebDriver
 			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElement);
 		}
 
+		private static void WriteElementNotFound( HttpListenerResponse response )
+		{
+			var responseBody = @"{
+				""error"":""no such element"",
+				""message"":""An element could not be located on the page using the given search parameters."",
+				""stacktrace"":""""
+			}";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 400);
+		}
+
 		private static Command.FindBody ParseFindElementBody( string body, HttpListenerResponse response )
 		{
 			var parsedBody = SimpleJSON.JSON.Parse( body );
