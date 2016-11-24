@@ -271,6 +271,20 @@ namespace tech.ironsheep.WebDriver
 			commands [command][httpMethod] = callback;
 		}
 
+		public void AddElement( GameObject obj, string uuid )
+		{
+			browsingContext [uuid] = obj;
+		}
+
+		public GameObject GetElement( string uuid )
+		{
+			GameObject ret;
+
+			browsingContext.TryGetValue (uuid, out ret);
+
+			return ret;
+		}
+
 		public static WebDriverManager instance {
 			get{
 				if (_instance == null) 
