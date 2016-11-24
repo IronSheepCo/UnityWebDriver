@@ -19,6 +19,9 @@ namespace tech.ironsheep.WebDriver.XPath
 
 		private List<Assembly> assemblies = new List<Assembly> ();
 
+		//Dictionary from class name to type
+		private Dictionary<string, Type> classNameToType = new Dictionary<string, Type> ();
+
 		public XPathParser()
 		{
 			//get all assemblies
@@ -247,6 +250,11 @@ namespace tech.ironsheep.WebDriver.XPath
 		{
 			string lower = className.ToLower ();
 
+			if (classNameToType.ContainsKey (lower)) 
+			{
+				return classNameToType [lower];
+			}
+
 			//search all assemblies
 			foreach (var assembly in assemblies) 
 			{
@@ -254,6 +262,9 @@ namespace tech.ironsheep.WebDriver.XPath
 				{
 					if (t.Name.ToLower() == lower) 
 					{
+						//add it to cache
+						classNameToType [lower] = t;
+
 						return t;
 					}
 				}
