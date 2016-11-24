@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
+using System.Net;
 
 using tech.ironsheep.WebDriver.XPath;
 
@@ -11,6 +13,7 @@ namespace tech.ironsheep.WebDriver.Tests
 		void Start () {
 			ParserTests ();
 			ParserEvaluateTest ();
+			FindCommands ();
 		}
 
 		private void ParserTests()
@@ -166,6 +169,27 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end evaluate test");
+		}
+
+		private void FindCommands()
+		{
+			try{
+				FindElementCommands.FindElement ("{\"using\":\"xpath\",\"value\":\"button\"}", null, null);
+			}
+			catch( Exception e ) {
+			}
+
+			try{
+				FindElementCommands.FindElement ("{\"using\":\"xpath\",\"value\":\"//text[@text=\\\"some text overhere\\\"]\"}", null, null);
+			}
+			catch( Exception e ) {
+			}
+
+			try{
+				FindElementCommands.FindElements ("{\"using\":\"xpath\",\"value\":\"button\"}", null, null);
+			}
+			catch( Exception e ) {
+			}
 		}
 		
 		// Update is called once per frame
