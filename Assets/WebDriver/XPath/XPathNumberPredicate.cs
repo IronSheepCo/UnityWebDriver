@@ -12,7 +12,7 @@ namespace tech.ironsheep.WebDriver.XPath
 		{
 			if (nodeList.Count <= Number) 
 			{
-				return null;
+				return new List<GameObject>();
 			}
 
 			List<GameObject> ret = new List<GameObject> ();
