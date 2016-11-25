@@ -9,6 +9,8 @@ using System.Threading;
 using System.IO;
 using System;
 
+using tech.ironsheep.WebDriver.Dispatch;
+
 namespace tech.ironsheep.WebDriver
 {
 	public class WebDriverManager
@@ -258,7 +260,9 @@ namespace tech.ironsheep.WebDriver
 									{
 										var registeredCommand = commands[ realCommand ][ request.HttpMethod ];
 
-										registeredCommand( body, args.Skip(1).ToArray(), response );
+										MainDispatcher.ExecuteBlocking( ()=>{
+											registeredCommand( body, args.Skip(1).ToArray(), response );
+										});
 									}
 									else
 									{
