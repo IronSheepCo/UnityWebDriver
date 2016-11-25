@@ -18,7 +18,11 @@ public class DispatcherHelper : MonoBehaviour {
 		lock (actions) {
 			
 			foreach (Action ac in actions) {
-				ac ();
+				try{
+					ac ();
+				}catch(Exception e) {
+					Debug.LogError (e);
+				}
 			}
 
 			actions = new List<Action> ();
