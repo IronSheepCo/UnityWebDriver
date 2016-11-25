@@ -308,10 +308,19 @@ namespace tech.ironsheep.WebDriver
 			commands [command][httpMethod] = callback;
 		}
 
-		public void AddElement( GameObject obj, string uuid )
+		public string AddElement( GameObject obj, string uuid )
 		{
+			string existingUUID = GetUUID (obj);
+
+			if (existingUUID != null) 
+			{
+				return existingUUID;
+			}
+				
 			browsingContext [uuid] = obj;
 			reversedBrowsingContext [obj] = uuid;
+
+			return uuid;
 		}
 
 		public GameObject GetElement( string uuid )
