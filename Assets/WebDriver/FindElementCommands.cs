@@ -12,7 +12,11 @@ namespace tech.ironsheep.WebDriver
 	public class FindElementCommands {
 
 		//<see href="https://w3c.github.io/webdriver/webdriver-spec.html#dfn-web-element-identifier" />
-		private static string WebElementIdentifierKey = "element-6066-11e4-a52e-4f735466cecf";
+		public static string WebElementIdentifierKey {
+			get {
+				return  "element-6066-11e4-a52e-4f735466cecf";
+			}
+		}
 
 		private static XPathParser parser = new XPathParser();
 
