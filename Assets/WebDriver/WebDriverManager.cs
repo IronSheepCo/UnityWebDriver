@@ -28,6 +28,7 @@ namespace tech.ironsheep.WebDriver
 		//current browsing context
 		//hash from uuid to GameObject
 		private Dictionary<string, GameObject> browsingContext = new Dictionary<string, GameObject>();
+		private Dictionary<GameObject, string> reversedBrowsingContext = new Dictionary<GameObject, string>();
 
 		//root game objects
 		public List<GameObject> RootGameObjects = new List<GameObject> ();
@@ -310,13 +311,23 @@ namespace tech.ironsheep.WebDriver
 		public void AddElement( GameObject obj, string uuid )
 		{
 			browsingContext [uuid] = obj;
+			reversedBrowsingContext [obj] = uuid;
 		}
 
 		public GameObject GetElement( string uuid )
 		{
-			GameObject ret;
+			GameObject ret = null;
 
 			browsingContext.TryGetValue (uuid, out ret);
+
+			return ret;
+		}
+
+		public string GetUUID( GameObject go )
+		{
+			string ret = null;
+
+			reversedBrowsingContext.TryGetValue ( go, out ret );
 
 			return ret;
 		}
