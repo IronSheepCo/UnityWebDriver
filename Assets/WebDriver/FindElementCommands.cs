@@ -137,7 +137,7 @@ namespace tech.ironsheep.WebDriver
 
 			string uuid = System.Guid.NewGuid ().ToString ();
 
-			WebDriverManager.instance.AddElement (found, uuid);
+			uuid = WebDriverManager.instance.AddElement (found, uuid);
 
 			string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", found.name, WebElementIdentifierKey, uuid);
 
@@ -180,7 +180,7 @@ namespace tech.ironsheep.WebDriver
 				{
 					string uuid = System.Guid.NewGuid ().ToString ();
 
-					WebDriverManager.instance.AddElement (go, uuid);
+					uuid = WebDriverManager.instance.AddElement (go, uuid);
 
 					string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", go.name, WebElementIdentifierKey, uuid);
 
