@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Net;
+using System.Text;
 
 using tech.ironsheep.WebDriver.XPath;
 
@@ -13,7 +14,8 @@ namespace tech.ironsheep.WebDriver.Tests
 		void Start () {
 			ParserTests ();
 			ParserEvaluateTest ();
-			FindCommands ();
+
+			StartCoroutine( FindCommands () );
 		}
 
 		private void ParserTests()
@@ -171,25 +173,64 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Log ("end evaluate test");
 		}
 
-		private void FindCommands()
+		private IEnumerator FindCommands()
 		{
-			try{
-				FindElementCommands.FindElement ("{\"using\":\"xpath\",\"value\":\"button\"}", null, null);
-			}
-			catch( Exception e ) {
-			}
+			string endPoint = "http://localhost:8080";
 
-			try{
-				FindElementCommands.FindElement ("{\"using\":\"xpath\",\"value\":\"//text[@text=\\\"some text overhere\\\"]\"}", null, null);
-			}
-			catch( Exception e ) {
-			}
+			string req = "{}";
 
-			try{
-				FindElementCommands.FindElements ("{\"using\":\"xpath\",\"value\":\"button\"}", null, null);
-			}
-			catch( Exception e ) {
-			}
+			byte[] byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			WWW session = new WWW (endPoint + "/session", byteReq );
+			yield return session;
+
+			string sessionId = SimpleJSON.JSON.Parse (session.text) ["sessionId"];
+
+			Debug.Assert ( sessionId != null );
+
+			req = "{\"using\":\"xpath\",\"value\":\"button\"}";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			WWW element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			var data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			var first = data [0];
+
+			string name = first ["name"].ToString ();
+			string firstButtonId = first [FindElementCommands.WebElementIdentifierKey];
+
+			Debug.Assert (name.Equals( "\"TestText\"" ));
+		
+	
+
+			req = "{\"using\":\"xpath\",\"value\":\"button[1]\"}";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			var second = data [0];
+
+			name = second ["name"].ToString ();
+
+			Debug.Assert (name.Equals( "\"Second\"" ));
+
+
+
+			req = "{\"using\":\"xpath\",\"value\":\"//button\"}";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			element = new WWW (string.Format ("{0}/session/{1}/elements", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			Debug.Assert (data.Count == 3);
+			Debug.Assert ( firstButtonId.Equals( data[0][FindElementCommands.WebElementIdentifierKey] ) );
 		}
 		
 		// Update is called once per frame
