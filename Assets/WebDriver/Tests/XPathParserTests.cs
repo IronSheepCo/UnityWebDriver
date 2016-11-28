@@ -339,6 +339,14 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (data.ToString() == "\"some text overhere\"" );
 
 
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/color", endPoint, sessionId, textId) );
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["result"];
+
+			Debug.Assert (data.ToString() != null );
+
+
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end attributes commands");
