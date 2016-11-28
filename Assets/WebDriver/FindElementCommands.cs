@@ -28,17 +28,6 @@ namespace tech.ironsheep.WebDriver
 			WebDriverManager.instance.RegisterCommand ("elements", "POST", FindElements);
 		}
 
-		private static void WriteElementNotFound( HttpListenerResponse response )
-		{
-			var responseBody = @"{
-				""error"":""no such element"",
-				""message"":""An element could not be located on the page using the given search parameters."",
-				""stacktrace"":""""
-			}";
-
-			WebDriverManager.instance.WriteResponse (response, responseBody, 400);
-		}
-
 		private static void WriteEmptyResult( HttpListenerResponse response )
 		{
 			var responseBody = @"{
@@ -132,7 +121,7 @@ namespace tech.ironsheep.WebDriver
 			//no results found
 			if (found == null) 
 			{
-				WriteElementNotFound (response);
+				WebDriverManager.instance.WriteElementNotFound (response);
 
 				return true;
 			}
@@ -212,7 +201,7 @@ namespace tech.ironsheep.WebDriver
 
 			if (root == null) 
 			{
-				WriteElementNotFound (response);
+				WebDriverManager.instance.WriteElementNotFound (response);
 			}
 
 			return FindElementFromRoot( body, new List<GameObject>(){ root }, response );
@@ -226,7 +215,7 @@ namespace tech.ironsheep.WebDriver
 
 			if (root == null) 
 			{
-				WriteElementNotFound (response);
+				WebDriverManager.instance.WriteElementNotFound (response);
 			}
 
 			return FindElementsFromRoot (body, new List<GameObject>(){root}, response);

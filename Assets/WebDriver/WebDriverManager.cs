@@ -84,6 +84,17 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse( response, "{\"data\":null}", 200 );
 		}
 
+		public void WriteElementNotFound( HttpListenerResponse response )
+		{
+			var responseBody = @"{
+				""error"":""no such element"",
+				""message"":""An element could not be located on the page using the given search parameters."",
+				""stacktrace"":""""
+			}";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 400);
+		}
+
 		public void RespondUnkownMethod( HttpListenerResponse response )
 		{
 			var responseBody = @"{
