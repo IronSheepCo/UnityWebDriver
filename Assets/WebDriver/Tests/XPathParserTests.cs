@@ -217,6 +217,8 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			name = second ["name"].ToString ();
 
+			var secondId = second [FindElementCommands.WebElementIdentifierKey];
+
 			Debug.Assert (name.Equals( "\"Second\"" ));
 
 
@@ -231,6 +233,18 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			Debug.Assert (data.Count == 3);
 			Debug.Assert ( firstButtonId.Equals( data[0][FindElementCommands.WebElementIdentifierKey] ) );
+
+
+			req = "{\"using\":\"xpath\",\"value\":\"//button\"}";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/element", endPoint, sessionId, secondId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			Debug.Assert (data.Count == 1);
+			Debug.Assert (data [0] ["name"].ToString ().Equals ("\"Second\""));
 		}
 		
 		// Update is called once per frame
