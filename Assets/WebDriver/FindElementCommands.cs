@@ -147,49 +147,52 @@ namespace tech.ironsheep.WebDriver
 		}
 
 		public static bool FindElements( string body, string[] args, HttpListenerResponse response )
+		{
+			FindBody findRequest = ParseFindElementBody (body, response);
+
+			if ( findRequest == null) 
 			{
-				FindBody findRequest = ParseFindElementBody (body, response);
+				return true;
+			}
 
-				if ( findRequest == null) 
-				{
-					return true;
-				}
+			//decide what is our starting set
+			List<GameObject> rootBag ;
 
-				List<GameObject> found = new List<GameObject> ();
+			List<GameObject> found = new List<GameObject> ();
 
-				//need to go use all root objects
-				//as context
-				foreach (var rgo in WebDriverManager.instance.RootGameObjects) 
-				{
-					found.AddRange( parser.Evaluate (findRequest.selector, rgo) );
-				}
+			//need to go use all root objects
+			//as context
+			foreach (var rgo in WebDriverManager.instance.RootGameObjects) 
+			{
+				found.AddRange( parser.Evaluate (findRequest.selector, rgo) );
+			}
 
-				//no results found
-				if (found.Count == 0) 
-				{
-					WriteEmptyResult (response);
-
-					return true;
-				}
-
-				List<string> objs = new List<string> ();
-
-				//we have results, lets 
-				//add them to context
-				foreach (var go in found) 
-				{
-					string uuid = System.Guid.NewGuid ().ToString ();
-
-					uuid = WebDriverManager.instance.AddElement (go, uuid);
-
-					string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", go.name, WebElementIdentifierKey, uuid);
-
-					objs.Add (jsonRepr);
-				}
-
-				WriteElementList (response, objs);
+			//no results found
+			if (found.Count == 0) 
+			{
+				WriteEmptyResult (response);
 
 				return true;
 			}
+
+			List<string> objs = new List<string> ();
+
+			//we have results, lets 
+			//add them to context
+			foreach (var go in found) 
+			{
+				string uuid = System.Guid.NewGuid ().ToString ();
+
+				uuid = WebDriverManager.instance.AddElement (go, uuid);
+
+				string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", go.name, WebElementIdentifierKey, uuid);
+
+				objs.Add (jsonRepr);
+			}
+
+			WriteElementList (response, objs);
+
+			return true;
+		}
 	}
 }
