@@ -175,6 +175,10 @@ namespace tech.ironsheep.WebDriver.Tests
 
 		private IEnumerator FindCommands()
 		{
+			Debug.Log ("start find commands");
+
+			float startTime = Time.realtimeSinceStartup;
+			
 			string endPoint = "http://localhost:8080";
 
 			string req = "{}";
@@ -257,6 +261,10 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			Debug.Assert (data.Count == 3);
 			Debug.Assert (data [1] ["name"].ToString ().Equals ("\"Second\""));
+
+			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
+
+			Debug.Log ("end find commands");
 		}
 		
 		// Update is called once per frame
