@@ -24,6 +24,7 @@ namespace tech.ironsheep.WebDriver
 		{
 			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElement);
 			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElementFromElement, "^[^/]*/element$");
+			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElementsFromElement, "^[^/]*/elements$");
 			WebDriverManager.instance.RegisterCommand ("elements", "POST", FindElements);
 		}
 
@@ -147,12 +148,7 @@ namespace tech.ironsheep.WebDriver
 			return true;
 		}
 
-		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
-		{
-			return FindElementFromRoot (body, WebDriverManager.instance.RootGameObjects, response);
-		}
-
-		public static bool FindElements( string body, string[] args, HttpListenerResponse response )
+		public static bool FindElementsFromRoot( string body, List<GameObject> rootBag, HttpListenerResponse response )
 		{
 			FindBody findRequest = ParseFindElementBody (body, response);
 
@@ -165,7 +161,7 @@ namespace tech.ironsheep.WebDriver
 
 			//need to go use all root objects
 			//as context
-			foreach (var rgo in WebDriverManager.instance.RootGameObjects) 
+			foreach (var rgo in rootBag) 
 			{
 				found.AddRange( parser.Evaluate (findRequest.selector, rgo) );
 			}
@@ -198,6 +194,16 @@ namespace tech.ironsheep.WebDriver
 			return true;
 		}
 
+		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
+		{
+			return FindElementFromRoot (body, WebDriverManager.instance.RootGameObjects, response);
+		}
+
+		public static bool FindElements( string body, string[] args, HttpListenerResponse response )
+		{
+			return FindElementsFromRoot (body, WebDriverManager.instance.RootGameObjects, response);
+		}
+
 		public static bool FindElementFromElement( string body, string[] args, HttpListenerResponse response )
 		{
 			string elementId = args [0].Replace("\"", "");
@@ -210,6 +216,20 @@ namespace tech.ironsheep.WebDriver
 			}
 
 			return FindElementFromRoot( body, new List<GameObject>(){ root }, response );
+		}
+
+		public static bool FindElementsFromElement( string body, string[] args, HttpListenerResponse response )
+		{
+			string elementId = args [0].Replace("\"", "");
+
+			GameObject root = WebDriverManager.instance.GetElement (elementId);
+
+			if (root == null) 
+			{
+				WriteElementNotFound (response);
+			}
+
+			return FindElementsFromRoot (body, new List<GameObject>(){root}, response);
 		}
 	}
 }

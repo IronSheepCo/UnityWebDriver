@@ -245,6 +245,18 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			Debug.Assert (data.Count == 1);
 			Debug.Assert (data [0] ["name"].ToString ().Equals ("\"Second\""));
+
+
+			req = "{\"using\":\"xpath\",\"value\":\"//button\"}";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/elements", endPoint, sessionId, firstButtonId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			Debug.Assert (data.Count == 3);
+			Debug.Assert (data [1] ["name"].ToString ().Equals ("\"Second\""));
 		}
 		
 		// Update is called once per frame
