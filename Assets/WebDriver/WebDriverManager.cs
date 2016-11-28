@@ -28,8 +28,8 @@ namespace tech.ironsheep.WebDriver
 
 		//current browsing context
 		//hash from uuid to GameObject
-		private Dictionary<string, GameObject> browsingContext = new Dictionary<string, GameObject>();
-		private Dictionary<GameObject, string> reversedBrowsingContext = new Dictionary<GameObject, string>();
+		private Dictionary<string, Component> browsingContext = new Dictionary<string, Component>();
+		private Dictionary<Component, string> reversedBrowsingContext = new Dictionary<Component, string>();
 
 		//root game objects
 		public List<GameObject> RootGameObjects = new List<GameObject> ();
@@ -65,7 +65,7 @@ namespace tech.ironsheep.WebDriver
 		void SceneManager_sceneUnloaded (Scene arg0)
 		{
 			//new browsing context
-			browsingContext = new Dictionary<string, GameObject> ();
+			browsingContext = new Dictionary<string, Component> ();
 
 			Debug.Log ("removing browsing context");
 		}
@@ -357,7 +357,7 @@ namespace tech.ironsheep.WebDriver
 			commands [command][httpMethod][reg] = callback;
 		}
 
-		public string AddElement( GameObject obj, string uuid )
+		public string AddElement( Component obj, string uuid )
 		{
 			string existingUUID = GetUUID (obj);
 
@@ -372,16 +372,16 @@ namespace tech.ironsheep.WebDriver
 			return uuid;
 		}
 
-		public GameObject GetElement( string uuid )
+		public Component GetElement( string uuid )
 		{
-			GameObject ret = null;
+			Component ret = null;
 
 			browsingContext.TryGetValue (uuid, out ret);
 
 			return ret;
 		}
 
-		public string GetUUID( GameObject go )
+		public string GetUUID( Component go )
 		{
 			string ret = null;
 

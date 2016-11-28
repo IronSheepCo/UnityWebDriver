@@ -102,7 +102,7 @@ namespace tech.ironsheep.WebDriver
 				return true;
 			}
 
-			GameObject found = null;
+			Component found = null;
 
 			//need to go use all root objects
 			//as context
@@ -146,7 +146,7 @@ namespace tech.ironsheep.WebDriver
 				return true;
 			}
 
-			List<GameObject> found = new List<GameObject> ();
+			List<Component> found = new List<Component> ();
 
 			//need to go use all root objects
 			//as context
@@ -197,7 +197,7 @@ namespace tech.ironsheep.WebDriver
 		{
 			string elementId = args [0].Replace("\"", "");
 
-			GameObject root = WebDriverManager.instance.GetElement (elementId);
+			GameObject root = WebDriverManager.instance.GetElement (elementId).gameObject;
 
 			if (root == null) 
 			{
@@ -211,7 +211,7 @@ namespace tech.ironsheep.WebDriver
 		{
 			string elementId = args [0].Replace("\"", "");
 
-			GameObject root = WebDriverManager.instance.GetElement (elementId);
+			GameObject root = WebDriverManager.instance.GetElement (elementId).gameObject;
 
 			if (root == null) 
 			{

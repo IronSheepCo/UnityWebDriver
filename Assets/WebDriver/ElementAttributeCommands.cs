@@ -21,7 +21,7 @@ namespace tech.ironsheep.WebDriver
 		{
 			string uuid = args [0].Replace ("\"", "");
 
-			GameObject go = WebDriverManager.instance.GetElement (uuid);
+			Component go = WebDriverManager.instance.GetElement (uuid);
 
 			//element is not found
 			if (go == null) 

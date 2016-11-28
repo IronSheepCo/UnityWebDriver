@@ -22,6 +22,8 @@ namespace tech.ironsheep.WebDriver.XPath
 		//Dictionary from class name to type
 		private Dictionary<string, Type> classNameToType = new Dictionary<string, Type> ();
 
+		private Type lastTypeUsed;
+
 		public XPathParser()
 		{
 			//get all assemblies
@@ -144,20 +146,22 @@ namespace tech.ironsheep.WebDriver.XPath
 			return ret;
 		}
 
-		private List<GameObject> EvaluateStep( XPathNode step, List<GameObject> nodeSet, bool treatChildAsSelf = false )
+		private List<Component> EvaluateStep( XPathNode step, List<GameObject> nodeSet, bool treatChildAsSelf = false )
 		{
-			List<GameObject> ret = new List<GameObject> ();
+			List<Component> ret = new List<Component> ();
 
 			foreach (var node in nodeSet) 
 			{
 				//get the type for the current tag
 				Type nodeType = FindType( step.TagName );
 
+				lastTypeUsed = nodeType;
+
 				//couldn't find the type for this node
 				//return null
 				if (nodeType == null) 
 				{
-					return new List<GameObject> ();
+					return new List<Component> ();
 				}
 
 				List<Component> results = new List<Component>();
@@ -206,13 +210,14 @@ namespace tech.ironsheep.WebDriver.XPath
 
 				foreach (var comp in results) 
 				{
-					ret.Add (comp.gameObject);	
+					ret.Add (comp);	
 				}
 
 				//need to use the predicates
 				foreach (var predicate in step.predicates) 
 				{
-					ret = predicate.Evaluate (ret, nodeType);
+					var retGo = ret.Select (comp => comp.gameObject).ToList();
+					ret = predicate.Evaluate ( retGo, nodeType).Select( go => go.GetComponent( nodeType ) ).ToList();
 				}
 			}
 
@@ -220,7 +225,7 @@ namespace tech.ironsheep.WebDriver.XPath
 		}
 
 		//Evaluates the xpath expression in the context of root
-		public List<GameObject> Evaluate( string xPath, GameObject root )
+		public List<Component> Evaluate( string xPath, GameObject root )
 		{
 			steps = Parse (xPath);
 
@@ -232,7 +237,7 @@ namespace tech.ironsheep.WebDriver.XPath
 			//step
 			var firstStep = steps [0];
 
-			currentSet = EvaluateStep (firstStep, currentSet, true);
+			currentSet = EvaluateStep (firstStep, currentSet, true).Select( comp => comp.gameObject ).ToList();
 
 			//removing the first step
 			steps.Remove (firstStep);
@@ -240,10 +245,10 @@ namespace tech.ironsheep.WebDriver.XPath
 			//evaluate each steps in the current context
 			foreach (var step in steps) 
 			{
-				currentSet = EvaluateStep( step, currentSet );
+				currentSet = EvaluateStep( step, currentSet ).Select( comp => comp.gameObject ).ToList();
 			}
 
-			return currentSet;
+			return currentSet.Select( go => go.GetComponent(lastTypeUsed) ).ToList();
 		}
 
 		public Type FindType( string className )
