@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading;
 using System.IO;
 using System;
+using System.Text.RegularExpressions;
 
 using tech.ironsheep.WebDriver.Dispatch;
 
@@ -23,7 +24,7 @@ namespace tech.ironsheep.WebDriver
 
 		private string sessionId = null;
 
-		private Dictionary<string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > > commands = new Dictionary< string, Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > >();
+		private Dictionary<string, Dictionary<string, Dictionary<Regex, Func<string, string[], HttpListenerResponse, bool> > > > commands = new Dictionary< string, Dictionary<string, Dictionary<Regex, Func<string, string[], HttpListenerResponse, bool> > > >();
 
 		//current browsing context
 		//hash from uuid to GameObject
@@ -259,9 +260,39 @@ namespace tech.ironsheep.WebDriver
 								{
 									if( commands[ realCommand ].ContainsKey( request.HttpMethod ) )
 									{
-										var registeredCommand = commands[ realCommand ][ request.HttpMethod ];
+										var registeredCommands = commands[ realCommand ][ request.HttpMethod ];
+
+										var restOfCommandSeg = args.Skip(1);
+
+										string restOfCommand = "";
+
+										if( restOfCommandSeg.Count() > 0 )
+										{
+											restOfCommand = restOfCommandSeg.Aggregate( (i,j) => i+"/"+j );
+										}
+
+										//the command to be executed
+										Func<string, string[], HttpListenerResponse, bool> registeredCommand = null;
+
+										//searching for a match
+										foreach( var entry in registeredCommands )
+										{
+											if( entry.Key.IsMatch( restOfCommand ) )
+											{
+												registeredCommand = entry.Value;
+												break;
+											}
+										}
+
+										if( registeredCommand == null )
+										{
+											RespondUnkownMethod( response );
+
+											return;
+										}
 
 										MainDispatcher.ExecuteBlocking( ()=>{
+											//need to see which ones of the reg exp match 
 											registeredCommand( body, args.Skip(1).ToArray(), response );
 										});
 									}
@@ -298,14 +329,21 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, responseBody, 400);
 		}
 
-		public void RegisterCommand( string command, string httpMethod, Func<string, string[], HttpListenerResponse, bool> callback )
+		public void RegisterCommand( string command, string httpMethod, Func<string, string[], HttpListenerResponse, bool> callback, string matchArgs = "^$" )
 		{
 			if (commands.ContainsKey (command) == false) 
 			{
-				commands [command] = new Dictionary<string, Func<string, string[], HttpListenerResponse, bool> > ();
+				commands [command] = new Dictionary<string, Dictionary<Regex, Func<string, string[], HttpListenerResponse, bool> > > ();
 			}
 
-			commands [command][httpMethod] = callback;
+			if (commands [command].ContainsKey (httpMethod) == false) 
+			{
+				commands [command] [httpMethod] = new Dictionary<Regex, Func<string, string[], HttpListenerResponse, bool> > ();
+			}
+
+			Regex reg = new Regex (matchArgs);
+
+			commands [command][httpMethod][reg] = callback;
 		}
 
 		public string AddElement( GameObject obj, string uuid )
