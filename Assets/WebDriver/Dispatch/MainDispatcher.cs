@@ -42,8 +42,18 @@ namespace tech.ironsheep.WebDriver.Dispatch
 			busyWaitingFlags [uid] = false;
 
 			realDispatcher.EnqueAction (() => {
-				ac();
-				busyWaitingFlags[uid] = true;
+				try
+				{
+					ac();
+				}
+				catch(Exception e)
+				{
+					Debug.LogError(e);
+				}
+				finally
+				{
+					busyWaitingFlags[uid] = true;
+				}
 			});
 
 			//busy waiting
