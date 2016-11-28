@@ -317,7 +317,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/atributeCareNuExista", endPoint, sessionId, firstButtonId) );
 			yield return element;
 
-			data = SimpleJSON.JSON.Parse (element.text) ["result"].AsObject;
+			data = SimpleJSON.JSON.Parse (element.text) ["data"].AsObject;
 
 			Debug.Assert (data == null);
 
@@ -325,7 +325,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/interactable", endPoint, sessionId, firstButtonId) );
 			yield return element;
 
-			data = SimpleJSON.JSON.Parse (element.text) ["result"];
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
 
 			Debug.Assert (data.ToString() == "\"True\"" );
 
@@ -334,7 +334,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/text", endPoint, sessionId, textId) );
 			yield return element;
 
-			data = SimpleJSON.JSON.Parse (element.text) ["result"];
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
 
 			Debug.Assert (data.ToString() == "\"some text overhere\"" );
 
@@ -342,9 +342,17 @@ namespace tech.ironsheep.WebDriver.Tests
 			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/color", endPoint, sessionId, textId) );
 			yield return element;
 
-			data = SimpleJSON.JSON.Parse (element.text) ["result"];
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
 
 			Debug.Assert (data.ToString() != null );
+
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/name", endPoint, sessionId, textId) );
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			Debug.Assert (data.ToString().ToLower()=="\"text\"" );
 
 
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));

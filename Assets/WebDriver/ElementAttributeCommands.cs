@@ -16,18 +16,19 @@ namespace tech.ironsheep.WebDriver
 		{
 			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]*/attribute/.*$");
 			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]*/property/.*$");
+			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementName, "^[^/]*/name$");
 		}
 
 		private static void WriteEmptyAttributeValue( HttpListenerResponse response)
 		{
-			string responseBody = @"{ ""result"":null }";
+			string responseBody = @"{ ""data"":null }";
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 		}
 
 		private static void WriteAttributeValue(string value, HttpListenerResponse response )
 		{
-			string responseBody = @"{""result"":"""+value+@"""}";
+			string responseBody = @"{""data"":"""+value+@"""}";
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 		}
@@ -60,6 +61,28 @@ namespace tech.ironsheep.WebDriver
 			{
 				WriteEmptyAttributeValue (response);
 			}
+
+			return true;
+		}
+
+		public static bool ElementName( string body, string[] args, HttpListenerResponse response )
+		{
+			string uuid = args [0].Replace ("\"", "");
+
+			Component comp = WebDriverManager.instance.GetElement (uuid);
+
+			//element is not found
+			if (comp == null) 
+			{
+				WebDriverManager.instance.WriteElementNotFound (response);
+				return true;
+			}
+
+			Type type = comp.GetType ();
+
+			string responseBody = "{\"data\":\""+type.Name+"\"}";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 
 			return true;
 		}
