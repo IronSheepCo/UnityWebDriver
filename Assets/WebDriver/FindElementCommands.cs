@@ -155,9 +155,6 @@ namespace tech.ironsheep.WebDriver
 				return true;
 			}
 
-			//decide what is our starting set
-			List<GameObject> rootBag ;
-
 			List<GameObject> found = new List<GameObject> ();
 
 			//need to go use all root objects
