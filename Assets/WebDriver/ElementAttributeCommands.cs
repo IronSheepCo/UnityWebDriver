@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System;
+using System.Reflection;
 
 using tech.ironsheep.WebDriver.Command;
 using tech.ironsheep.WebDriver.XPath;
@@ -13,21 +14,51 @@ namespace tech.ironsheep.WebDriver
 	{
 		public static void Init()
 		{
-			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]/attribute/.*$");
-			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]/property/.*$");
+			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]*/attribute/.*$");
+			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]*/property/.*$");
+		}
+
+		private static void WriteEmptyAttributeValue( HttpListenerResponse response)
+		{
+			string responseBody = @"{ ""result"":null }";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
+		}
+
+		private static void WriteAttributeValue(string value, HttpListenerResponse response )
+		{
+			string responseBody = @"{""result"":"""+value+@"""}";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 		}
 
 		public static bool ElementAttribute( string body, string[] args, HttpListenerResponse response )
 		{
 			string uuid = args [0].Replace ("\"", "");
 
-			Component go = WebDriverManager.instance.GetElement (uuid);
+			string attributeName = args [2];
+
+			Component comp = WebDriverManager.instance.GetElement (uuid);
 
 			//element is not found
-			if (go == null) 
+			if (comp == null) 
 			{
 				WebDriverManager.instance.WriteElementNotFound (response);
 				return true;
+			}
+
+			Type type = comp.GetType ();
+
+			PropertyInfo propertyInfo = type.GetProperty (attributeName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase );
+
+			if (propertyInfo != null) 
+			{
+				string value = propertyInfo.GetValue (comp, null).ToString ();
+				WriteAttributeValue (value, response);
+			}
+			else 
+			{
+				WriteEmptyAttributeValue (response);
 			}
 
 			return true;

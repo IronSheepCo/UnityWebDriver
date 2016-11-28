@@ -10,6 +10,8 @@ namespace tech.ironsheep.WebDriver.Tests
 {
 	public class XPathParserTests : MonoBehaviour {
 
+		private string sessionId;
+
 		// Use this for initialization
 		void Start () {
 			ParserTests ();
@@ -188,7 +190,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			WWW session = new WWW (endPoint + "/session", byteReq );
 			yield return session;
 
-			string sessionId = SimpleJSON.JSON.Parse (session.text) ["sessionId"];
+			sessionId = SimpleJSON.JSON.Parse (session.text) ["sessionId"];
 
 			Debug.Assert ( sessionId != null );
 
@@ -265,6 +267,81 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end find commands");
+
+			StartCoroutine (AttributesCommands ());
+		}
+
+		private IEnumerator AttributesCommands()
+		{
+			Debug.Log ("start attributes commands");
+
+			float startTime = Time.realtimeSinceStartup;
+
+			string endPoint = "http://localhost:8080";
+
+			string req = "{\"using\":\"xpath\",\"value\":\"button\"}";
+
+			byte[] byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			WWW element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			var data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			var first = data [0];
+
+			string name = first ["name"].ToString ();
+			string firstButtonId = first [FindElementCommands.WebElementIdentifierKey];
+
+			Debug.Assert (name.Equals( "\"TestText\"" ));
+
+
+			req = "{\"using\":\"xpath\",\"value\":\"text[@text=\\\"some text overhere\\\"]\"}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			first = data [0];
+
+			string textId = first [FindElementCommands.WebElementIdentifierKey];
+
+
+
+			req = "";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/atributeCareNuExista", endPoint, sessionId, firstButtonId) );
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["result"].AsObject;
+
+			Debug.Assert (data == null);
+
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/interactable", endPoint, sessionId, firstButtonId) );
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["result"];
+
+			Debug.Assert (data.ToString() == "\"True\"" );
+
+
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/attribute/text", endPoint, sessionId, textId) );
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["result"];
+
+			Debug.Assert (data.ToString() == "\"some text overhere\"" );
+
+
+			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
+
+			Debug.Log ("end attributes commands");
 		}
 		
 		// Update is called once per frame
