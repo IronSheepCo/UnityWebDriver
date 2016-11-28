@@ -23,6 +23,7 @@ namespace tech.ironsheep.WebDriver
 		public static void Init()
 		{
 			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElement);
+			WebDriverManager.instance.RegisterCommand ("element", "POST", FindElementFromElement, "^[^/]*/element$");
 			WebDriverManager.instance.RegisterCommand ("elements", "POST", FindElements);
 		}
 
@@ -102,7 +103,7 @@ namespace tech.ironsheep.WebDriver
 			return findBody;
 		}
 
-		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
+		private static bool FindElementFromRoot( string body, List<GameObject> root, HttpListenerResponse response )
 		{
 			FindBody findRequest = ParseFindElementBody (body, response);
 
@@ -115,7 +116,7 @@ namespace tech.ironsheep.WebDriver
 
 			//need to go use all root objects
 			//as context
-			foreach (var rgo in WebDriverManager.instance.RootGameObjects) 
+			foreach (var rgo in root) 
 			{
 				var resp = parser.Evaluate (findRequest.selector, rgo);
 
@@ -144,6 +145,11 @@ namespace tech.ironsheep.WebDriver
 			WriteElementList (response, new List<string>{ jsonRepr });
 
 			return true;
+		}
+
+		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
+		{
+			return FindElementFromRoot (body, WebDriverManager.instance.RootGameObjects, response);
 		}
 
 		public static bool FindElements( string body, string[] args, HttpListenerResponse response )
@@ -190,6 +196,20 @@ namespace tech.ironsheep.WebDriver
 			WriteElementList (response, objs);
 
 			return true;
+		}
+
+		public static bool FindElementFromElement( string body, string[] args, HttpListenerResponse response )
+		{
+			string elementId = args [0].Replace("\"", "");
+
+			GameObject root = WebDriverManager.instance.GetElement (elementId);
+
+			if (root == null) 
+			{
+				WriteElementNotFound (response);
+			}
+
+			return FindElementFromRoot( body, new List<GameObject>(){ root }, response );
 		}
 	}
 }
