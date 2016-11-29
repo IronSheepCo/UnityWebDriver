@@ -118,7 +118,7 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			float startTime = Time.realtimeSinceStartup;
 
-			GameObject root = GameObject.Find ("/TestText");
+			GameObject root = GameObject.Find ("TestText");
 
 			var results = parser.Evaluate ("/button", root);
 
