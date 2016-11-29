@@ -390,9 +390,23 @@ namespace tech.ironsheep.WebDriver.Tests
 			string secondButtonId = data[0][FindElementCommands.WebElementIdentifierKey];
 
 
+	
 
 			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/click", endPoint, sessionId, secondButtonId) );
 			yield return element;
+
+
+
+			req = "{\"text\":\"text from test\"}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/value", endPoint, sessionId, textId ), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			first = data [0];
 
 
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
