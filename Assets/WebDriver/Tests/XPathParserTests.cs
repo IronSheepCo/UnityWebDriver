@@ -377,6 +377,24 @@ namespace tech.ironsheep.WebDriver.Tests
 			GameObject.Find ("Text").GetComponent<Text>().enabled = true;
 
 
+
+			req = "{\"using\":\"xpath\",\"value\":\"button[@name=\\\"Second\\\"\"}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			string secondButtonId = data[0][FindElementCommands.WebElementIdentifierKey];
+
+
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/click", endPoint, sessionId, secondButtonId) );
+			yield return element;
+
+
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end attributes commands");

@@ -13,6 +13,7 @@ namespace tech.ironsheep.WebDriver
 			var instance = WebDriverManager.instance;
 			FindElementCommands.Init ();
 			ElementAttributeCommands.Init ();
+			ElementInteractCommands.Init ();
 			MainDispatcher.ExecuteBlocking (() => {
 				Debug.Log("started dispatcher");
 			});
