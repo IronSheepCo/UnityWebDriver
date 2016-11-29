@@ -106,6 +106,17 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, responseBody, 405);
 		}
 
+		public void WriteElementNotInteractable( HttpListenerResponse response )
+		{
+			var responseBody = @"{
+				""error"":""element not interactable"",
+				""message"":""An element command could not be completed because the element is not pointer- or keyboard interactable."",
+				""stacktrace"":""""
+			}";
+
+			WriteResponse (response, responseBody, 400);
+		}
+
 		private void BadSessionId( string body, HttpListenerResponse response )
 		{
 			string responseBody = @"{
