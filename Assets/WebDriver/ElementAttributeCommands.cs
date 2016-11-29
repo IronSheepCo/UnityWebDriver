@@ -10,7 +10,7 @@ using tech.ironsheep.WebDriver.XPath;
 
 namespace tech.ironsheep.WebDriver
 {
-	public class ElementAttributeCommands  
+	public class ElementAttributeCommands: BaseCommand
 	{
 		public static void Init()
 		{
@@ -32,22 +32,6 @@ namespace tech.ironsheep.WebDriver
 			string responseBody = @"{""data"":"""+value+@"""}";
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
-		}
-
-		private static Component GetComponent( string[] args, HttpListenerResponse response )
-		{
-			string uuid = args [0].Replace ("\"", "");
-
-			Component comp = WebDriverManager.instance.GetElement (uuid);
-
-			//element is not found
-			if (comp == null) 
-			{
-				WebDriverManager.instance.WriteElementNotFound (response);
-				return null;
-			}
-
-			return comp;
 		}
 
 		public static bool ElementAttribute( string body, string[] args, HttpListenerResponse response )

@@ -9,7 +9,7 @@ using tech.ironsheep.WebDriver.XPath;
 
 namespace tech.ironsheep.WebDriver
 {
-	public class FindElementCommands {
+	public class FindElementCommands: BaseCommand {
 
 		//<see href="https://w3c.github.io/webdriver/webdriver-spec.html#dfn-web-element-identifier" />
 		public static string WebElementIdentifierKey {
