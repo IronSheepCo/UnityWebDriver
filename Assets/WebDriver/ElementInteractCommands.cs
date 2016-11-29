@@ -66,7 +66,7 @@ namespace tech.ironsheep.WebDriver
 			} 
 			else 
 			{
-				
+				comp.gameObject.SendMessage ("set_text", text);
 			}
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
