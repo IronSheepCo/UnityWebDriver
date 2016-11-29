@@ -18,7 +18,7 @@ namespace tech.ironsheep.WebDriver
 			}
 		}
 
-		private static XPathParser parser = new XPathParser();
+		public static XPathParser parser = new XPathParser();
 
 		public static void Init()
 		{
