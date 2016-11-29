@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Collections;
 using System.Net;
@@ -362,6 +363,18 @@ namespace tech.ironsheep.WebDriver.Tests
 			data = SimpleJSON.JSON.Parse (element.text) ["data"];
 
 			Debug.Assert (data.ToString().ToLower()=="\"true\"" );
+
+
+			GameObject.Find ("Text").GetComponent<Text>().enabled = false;
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/enabled", endPoint, sessionId, textId) );
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			Debug.Assert (data.ToString().ToLower()=="\"false\"" );
+
+			GameObject.Find ("Text").GetComponent<Text>().enabled = true;
 
 
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));

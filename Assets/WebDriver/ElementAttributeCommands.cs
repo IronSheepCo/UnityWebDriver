@@ -105,7 +105,7 @@ namespace tech.ironsheep.WebDriver
 				return true;
 			}
 
-			string responseBody = "{\"data\":"+comp.gameObject.activeInHierarchy+"}";
+			string responseBody = "{\"data\":"+(comp as MonoBehaviour).enabled+"}";
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 
