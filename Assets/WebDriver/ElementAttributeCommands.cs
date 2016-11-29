@@ -17,6 +17,7 @@ namespace tech.ironsheep.WebDriver
 			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]*/attribute/.*$");
 			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementAttribute, "^[^/]*/property/.*$");
 			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementName, "^[^/]*/name$");
+			WebDriverManager.instance.RegisterCommand ("element", "GET", ElementEnabled, "^[^/]*/enabled");
 		}
 
 		private static void WriteEmptyAttributeValue( HttpListenerResponse response)
@@ -33,11 +34,9 @@ namespace tech.ironsheep.WebDriver
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 		}
 
-		public static bool ElementAttribute( string body, string[] args, HttpListenerResponse response )
+		private static Component GetComponent( string[] args, HttpListenerResponse response )
 		{
 			string uuid = args [0].Replace ("\"", "");
-
-			string attributeName = args [2];
 
 			Component comp = WebDriverManager.instance.GetElement (uuid);
 
@@ -45,8 +44,22 @@ namespace tech.ironsheep.WebDriver
 			if (comp == null) 
 			{
 				WebDriverManager.instance.WriteElementNotFound (response);
+				return null;
+			}
+
+			return comp;
+		}
+
+		public static bool ElementAttribute( string body, string[] args, HttpListenerResponse response )
+		{
+			Component comp = GetComponent (args, response);
+
+			if (comp == null) 
+			{
 				return true;
 			}
+				
+			string attributeName = args [2];
 
 			Type type = comp.GetType ();
 
@@ -67,20 +80,32 @@ namespace tech.ironsheep.WebDriver
 
 		public static bool ElementName( string body, string[] args, HttpListenerResponse response )
 		{
-			string uuid = args [0].Replace ("\"", "");
+			Component comp = GetComponent (args, response);
 
-			Component comp = WebDriverManager.instance.GetElement (uuid);
-
-			//element is not found
 			if (comp == null) 
 			{
-				WebDriverManager.instance.WriteElementNotFound (response);
 				return true;
 			}
 
 			Type type = comp.GetType ();
 
 			string responseBody = "{\"data\":\""+type.Name+"\"}";
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
+
+			return true;
+		}
+
+		public static bool ElementEnabled( string body, string[] args, HttpListenerResponse response)
+		{
+			Component comp = GetComponent (args, response);
+
+			if (comp == null) 
+			{
+				return true;
+			}
+
+			string responseBody = "{\"data\":"+comp.gameObject.activeInHierarchy+"}";
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 
