@@ -208,7 +208,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			string name = first ["name"].ToString ();
 			string firstButtonId = first [FindElementCommands.WebElementIdentifierKey];
 
-			Debug.Assert (name.Equals( "\"TestText\"" ));
+			Debug.Assert ( firstButtonId != null);
 		
 	
 
@@ -254,6 +254,19 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (data [0] ["name"].ToString ().Equals ("\"Second\""));
 
 
+			req = "{\"using\":\"xpath\",\"value\":\"//button[@name=\\\"TestText\\\"]\"}";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			Debug.Assert (data.Count == 1);
+			firstButtonId = data[0][FindElementCommands.WebElementIdentifierKey];
+
+
+
 			req = "{\"using\":\"xpath\",\"value\":\"//button\"}";
 			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
 
@@ -294,7 +307,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			string name = first ["name"].ToString ();
 			string firstButtonId = first [FindElementCommands.WebElementIdentifierKey];
 
-			Debug.Assert (name.Equals( "\"TestText\"" ));
+			Debug.Assert (name.Equals( "\"Second\"" ));
 
 
 			req = "{\"using\":\"xpath\",\"value\":\"text[@text=\\\"some text overhere\\\"]\"}";
