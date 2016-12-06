@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System;
+using System.Linq;
 
 using tech.ironsheep.WebDriver.Command;
 using tech.ironsheep.WebDriver.XPath;
@@ -155,6 +156,8 @@ namespace tech.ironsheep.WebDriver
 				found.AddRange( parser.Evaluate (findRequest.selector, rgo) );
 			}
 
+			found = found.Distinct ().ToList();
+
 			//no results found
 			if (found.Count == 0) 
 			{
@@ -183,14 +186,73 @@ namespace tech.ironsheep.WebDriver
 			return true;
 		}
 
+		private static List<GameObject> FindStartBag( string body, HttpListenerResponse response )
+		{
+			FindBody findBody = ParseFindElementBody( body, response );
+
+			if( findBody == null )
+			{
+				return null;
+			}
+
+			var steps = parser.Parse (findBody.selector);
+			var step = steps [0];
+
+			Type type = parser.FindType (step.TagName);
+
+			var tmpList = GameObject.FindObjectsOfType ( type );
+
+			List<GameObject> rootBag = new List<GameObject> ();
+
+			//we need only root objects for this
+			foreach (var obj in tmpList) 
+			{
+				Component comp = obj as Component;
+
+				if (comp == null) 
+				{
+					continue;
+				}
+
+				if (step.IsChild == true) 
+				{
+					if (comp.gameObject.transform.parent == null) 
+					{
+						rootBag.Add (comp.gameObject);
+					}
+				}
+				else 
+				{
+					rootBag.Add (comp.gameObject);
+				}
+			}
+
+
+			return rootBag;
+		}
+
 		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
 		{
-			return FindElementFromRoot (body, WebDriverManager.instance.RootGameObjects, response);
+			var rootBag = FindStartBag (body, response);
+
+			if (rootBag == null) 
+			{
+				return true;
+			}
+
+			return FindElementFromRoot (body, rootBag, response);
 		}
 
 		public static bool FindElements( string body, string[] args, HttpListenerResponse response )
 		{
-			return FindElementsFromRoot (body, WebDriverManager.instance.RootGameObjects, response);
+			var rootBag = FindStartBag (body, response);
+
+			if (rootBag == null) 
+			{
+				return true;
+			}
+
+			return FindElementsFromRoot (body, rootBag, response);
 		}
 
 		public static bool FindElementFromElement( string body, string[] args, HttpListenerResponse response )

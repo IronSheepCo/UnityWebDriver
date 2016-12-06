@@ -150,6 +150,8 @@ namespace tech.ironsheep.WebDriver.XPath
 		{
 			List<Component> ret = new List<Component> ();
 
+			HashSet<Component> added = new HashSet<Component> ();
+
 			foreach (var node in nodeSet) 
 			{
 				//get the type for the current tag
@@ -210,7 +212,18 @@ namespace tech.ironsheep.WebDriver.XPath
 
 				foreach (var comp in results) 
 				{
+					//this may happen because Unity
+					//doesn't have a root object(s)
+					//so we need to rely on GetObjectsOfType
+					//which return not only the root, but all objects
+					//in a random order
+					if (added.Contains (comp)) 
+					{
+						continue;
+					}
+
 					ret.Add (comp);	
+					added.Add (comp);
 				}
 
 				//need to use the predicates

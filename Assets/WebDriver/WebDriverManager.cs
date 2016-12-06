@@ -31,43 +31,13 @@ namespace tech.ironsheep.WebDriver
 		private Dictionary<string, Component> browsingContext = new Dictionary<string, Component>();
 		private Dictionary<Component, string> reversedBrowsingContext = new Dictionary<Component, string>();
 
-		//root game objects
-		public List<GameObject> RootGameObjects = new List<GameObject> ();
-
 		private WebDriverManager()
 		{
 			listener = new HttpListener ();
 
 			listener.Prefixes.Add ("http://*:8080/");
 
-			RegisterSceneManagement ();
-
-			//getting the root game objects
-			RootGameObjects = SceneManager.GetActiveScene().GetRootGameObjects ().ToList ();
-
 			StartWebDriver ();
-		}
-
-		private void RegisterSceneManagement()
-		{
-			SceneManager.sceneUnloaded += SceneManager_sceneUnloaded;
-			SceneManager.sceneLoaded += SceneManager_sceneLoaded;
-		}
-
-		void SceneManager_sceneLoaded (Scene arg0, LoadSceneMode arg1)
-		{
-			//get the root objects
-			RootGameObjects = arg0.GetRootGameObjects ().ToList ();
-
-			Debug.Log ("getting root objects");
-		}
-
-		void SceneManager_sceneUnloaded (Scene arg0)
-		{
-			//new browsing context
-			browsingContext = new Dictionary<string, Component> ();
-
-			Debug.Log ("removing browsing context");
 		}
 
 		public void WriteResponse( HttpListenerResponse response, string body, int code )
