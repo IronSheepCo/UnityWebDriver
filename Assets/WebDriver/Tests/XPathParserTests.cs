@@ -278,6 +278,18 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (data.Count == 3);
 			Debug.Assert (data [1] ["name"].ToString ().Equals ("\"Second\""));
 
+
+			//negative testing here
+			req = "{\"using\":\"xpath\",\"value\":\"//muie_dna\"}";
+			byteReq = ASCIIEncoding.ASCII.GetBytes ( req );
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			Debug.Assert (data.Count == 0);
+
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end find commands");

@@ -200,6 +200,12 @@ namespace tech.ironsheep.WebDriver
 
 			Type type = parser.FindType (step.TagName);
 
+			if (type == null) 
+			{
+				//no type, we need to return an empty result test
+				return new List<GameObject>();
+			}
+
 			var tmpList = GameObject.FindObjectsOfType ( type );
 
 			List<GameObject> rootBag = new List<GameObject> ();
