@@ -2,6 +2,7 @@
 using System.Collections;
 
 using tech.ironsheep.WebDriver.Dispatch;
+using System.Net;
 
 namespace tech.ironsheep.WebDriver
 {
@@ -17,7 +18,17 @@ namespace tech.ironsheep.WebDriver
 			MainDispatcher.ExecuteBlocking (() => {
 				Debug.Log("started dispatcher");
 			});
+
+            
 		}
+
+        void OnGUI()
+        {
+            if (GUI.Button(new Rect(100f, 100f, 50f, 30f), "test"))
+            {
+                Debug.Log(ClientSearch.ClientSearch.BroadcastAppReady().ToString());
+            }
+        }
 		
 		// Update is called once per frame
 		void Update () {
