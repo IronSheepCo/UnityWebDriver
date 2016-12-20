@@ -24,7 +24,7 @@ namespace tech.ironsheep.WebDriver
 
         void OnGUI()
         {
-            if (GUI.Button(new Rect(100f, 100f, 50f, 30f), "test"))
+            if (GUI.Button(new Rect(100f, 100f, 100f, 50f), "App Ready!"))
             {
                 Debug.Log(ClientSearch.ClientSearch.BroadcastAppReady().ToString());
             }

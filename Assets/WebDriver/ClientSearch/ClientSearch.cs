@@ -10,19 +10,67 @@ namespace tech.ironsheep.WebDriver.ClientSearch
 {
     public static class ClientSearch
     {
+        const int BROADCAST_IP = 23923;
+        private static Socket _broadcastSocket;
+        private static Socket broadcastSocket
+        {
+            get
+            {
+                if (_broadcastSocket == null)
+                {
+                    _broadcastSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                    _broadcastSocket.EnableBroadcast = true;
+                    return _broadcastSocket;
+                }
+                else
+                {
+                    return _broadcastSocket;
+                }
+            }
+        }
+
+        private static IPAddress _broadcastIP;
+        private static IPAddress broadcastIP
+        {
+            get
+            {
+                if (_broadcastIP == null)
+                {
+                    _broadcastIP = GetBroadcastIP();
+                    return _broadcastIP;
+                }
+                else
+                {
+                    return _broadcastIP;
+                }
+            }
+        }
+
+        private static IPEndPoint _sendingIP;
+        private static IPEndPoint sendingIP
+        {
+            get
+            {
+                if (_sendingIP == null)
+                {
+                    _sendingIP = new IPEndPoint(broadcastIP, BROADCAST_IP);
+                    return _sendingIP;
+                }
+                else
+                {
+                    return _sendingIP;
+                }
+            }
+        }
 
         public static bool BroadcastAppReady()
         {
-            Socket sendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            IPAddress broadcastIP = GetBroadcastIP();
             if (broadcastIP == null) return false;
-            //localIP.AddressFamily
+            if (sendingIP == null) return false;
 
             byte[] magicPacket = Encoding.ASCII.GetBytes("echo for clients");
-            // set up broadcast message
-            EndPoint send_ep = new IPEndPoint(broadcastIP, 30718);
-            sendSocket.SendTo(magicPacket, magicPacket.Length, SocketFlags.None, send_ep);
-
+            broadcastSocket.SendTo(magicPacket, magicPacket.Length, SocketFlags.None, sendingIP);
+            
             return true;
         }
 
