@@ -31,6 +31,8 @@ namespace tech.ironsheep.WebDriver
 		private Dictionary<string, Component> browsingContext = new Dictionary<string, Component>();
 		private Dictionary<Component, string> reversedBrowsingContext = new Dictionary<Component, string>();
 
+        public Action<bool> SessionStarted = null;
+
 		private WebDriverManager()
 		{
 			listener = new HttpListener ();
@@ -108,7 +110,10 @@ namespace tech.ironsheep.WebDriver
 				}";
 
 				WriteResponse (response, responseBody, 500);
-
+                if (SessionStarted != null)
+                {
+                    SessionStarted(true);
+                }
 				return;
 			}
 
@@ -120,6 +125,11 @@ namespace tech.ironsheep.WebDriver
 			var reBody = string.Format( "{{ \"sessionId\":\"{0}\",\"capabilities\":{{}} }}", sessionId);
 
 			WriteResponse (response, reBody, 200);
+
+            if (SessionStarted != null)
+            {
+                SessionStarted(true);
+            }
 		}
 
 		public void DeleteSession( string sessId, HttpListenerResponse response )
@@ -130,6 +140,10 @@ namespace tech.ironsheep.WebDriver
 			{
 				BadSessionId ("", response);
 
+                if (SessionStarted != null)
+                {
+                    SessionStarted(false);
+                }
 				return;
 			}
 
@@ -142,6 +156,11 @@ namespace tech.ironsheep.WebDriver
             if (response != null)
             {
                 WriteResponse(response, responseBody, 200);
+            }
+
+            if (SessionStarted != null)
+            {
+                SessionStarted(false);
             }
 		}
 
