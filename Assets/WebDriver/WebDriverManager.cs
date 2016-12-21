@@ -122,7 +122,7 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, reBody, 200);
 		}
 
-		private void DeleteSession( string sessId, HttpListenerResponse response )
+		public void DeleteSession( string sessId, HttpListenerResponse response )
 		{
 			string responseBody;
 			
@@ -139,7 +139,10 @@ namespace tech.ironsheep.WebDriver
 
 			sessionId = null;
 
-			WriteResponse (response, responseBody, 200);
+            if (response != null)
+            {
+                WriteResponse(response, responseBody, 200);
+            }
 		}
 
 		private void RespondToStatus( string body, HttpListenerResponse response )

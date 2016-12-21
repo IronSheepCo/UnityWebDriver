@@ -437,7 +437,14 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end attributes commands");
+
+            EndSession();
 		}
+
+        private void EndSession()
+        {
+            WebDriverManager.instance.DeleteSession(this.sessionId, null);
+        }
 		
 		// Update is called once per frame
 		void Update () {
