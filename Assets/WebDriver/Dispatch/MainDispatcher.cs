@@ -28,6 +28,11 @@ namespace tech.ironsheep.WebDriver.Dispatch
 			uiThread = System.Threading.Thread.CurrentThread;
 		}
 
+		public static void ExecuteCoroutine( IEnumerator coroutine )
+		{
+			realDispatcher.EnqueCo (coroutine);
+		}
+
 		public static void ExecuteBlocking( Action ac )
 		{
 			//check if we're on the main thread
