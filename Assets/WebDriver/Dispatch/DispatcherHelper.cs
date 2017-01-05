@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class DispatcherHelper : MonoBehaviour {
 
 	private List<Action> actions = new List<Action>();
+	private List<IEnumerator> coroutines = new List<IEnumerator>();
 
 	// Use this for initialization
 	void Start () {
@@ -26,6 +27,21 @@ public class DispatcherHelper : MonoBehaviour {
 			}
 
 			actions = new List<Action> ();
+		}
+
+		lock (coroutines) {
+			foreach (IEnumerator en in coroutines) {
+				StartCoroutine (en);
+			}
+
+			coroutines = new List<IEnumerator> ();
+		}
+	}
+
+	public void EnqueCo( IEnumerator en )
+	{
+		lock (coroutines) {
+			coroutines.Add (en);
 		}
 	}
 
