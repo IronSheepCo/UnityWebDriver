@@ -182,7 +182,7 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			float startTime = Time.realtimeSinceStartup;
 			
-			string endPoint = "http://localhost:8080";
+			string endPoint = "http://localhost:4569";
 
 			string req = "{}";
 
@@ -303,7 +303,7 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			float startTime = Time.realtimeSinceStartup;
 
-			string endPoint = "http://localhost:8080";
+			string endPoint = "http://localhost:4569";
 
 			string req = "{\"using\":\"xpath\",\"value\":\"button\"}";
 

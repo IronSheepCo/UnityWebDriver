@@ -37,7 +37,7 @@ namespace tech.ironsheep.WebDriver
 		{
 			listener = new HttpListener ();
 
-			listener.Prefixes.Add ("http://*:8080/");
+			listener.Prefixes.Add ("http://*:4569/");
 
 			StartWebDriver ();
 		}
