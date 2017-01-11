@@ -33,6 +33,29 @@ namespace tech.ironsheep.WebDriver
 
         public Action<bool> SessionStarted = null;
 
+		//timeouts
+		private int implicitTimeout = 0;
+		private int pageLoadTimeout = 300000;
+		private int scriptTimeout = 30000;
+
+		public int ImplicitTimeout {
+			get{
+				return implicitTimeout;
+			}
+		}
+
+		public int PageLoadTimeout {
+			get{
+				return pageLoadTimeout;
+			}
+		}
+
+		public int ScriptTimeout {
+			get{
+				return scriptTimeout;
+			}
+		}
+
 		private WebDriverManager()
 		{
 			listener = new HttpListener ();

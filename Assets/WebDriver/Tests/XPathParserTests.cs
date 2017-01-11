@@ -433,12 +433,62 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			first = data [0];
 
+			req = "{\"using\":\"xpath\",\"value\":\"button[@name=\\\"Third\\\"]\"}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			first = data [0];
+
+			name = first ["name"].ToString ();
+			string thirdButtonId = first [FindElementCommands.WebElementIdentifierKey];
+
+			Debug.Assert (name.Equals( "\"Third\"" ));
+
+			element = new WWW (string.Format ("{0}/session/{1}/element/{2}/highlight", endPoint, sessionId, thirdButtonId) );
+			yield return element;
 
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end attributes commands");
 
             EndSession();
+
+			StartCoroutine (TestTimeouts ());
+		}
+
+		private IEnumerator TestTimeouts()
+		{
+			Debug.Log ("start timeouts tests");
+
+			float startTime = Time.realtimeSinceStartup;
+
+			string endPoint = "http://localhost:4569";
+
+			string req = "{\"capabilitites\":{}}";
+
+			byte[] byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			WWW session = new WWW (endPoint + "/session", byteReq );
+			yield return session;
+
+			sessionId = SimpleJSON.JSON.Parse (session.text) ["sessionId"];
+
+			Debug.Assert (WebDriverManager.instance.ImplicitTimeout == 0);
+			Debug.Assert (WebDriverManager.instance.ScriptTimeout == 30000);
+			Debug.Assert (WebDriverManager.instance.PageLoadTimeout == 300000);
+
+			EndSession ();
+
+			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
+
+			Debug.Log ("end timeout tests");
+
+			//EndSession();
 		}
 
         private void EndSession()
