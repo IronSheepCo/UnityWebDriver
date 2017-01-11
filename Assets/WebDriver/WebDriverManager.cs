@@ -34,23 +34,23 @@ namespace tech.ironsheep.WebDriver
         public Action<bool> SessionStarted = null;
 
 		//timeouts
-		private int implicitTimeout = 0;
-		private int pageLoadTimeout = 300000;
-		private int scriptTimeout = 30000;
+		private long implicitTimeout = 0;
+		private long pageLoadTimeout = 300000;
+		private long scriptTimeout = 30000;
 
-		public int ImplicitTimeout {
+		public long ImplicitTimeout {
 			get{
 				return implicitTimeout;
 			}
 		}
 
-		public int PageLoadTimeout {
+		public long PageLoadTimeout {
 			get{
 				return pageLoadTimeout;
 			}
 		}
 
-		public int ScriptTimeout {
+		public long ScriptTimeout {
 			get{
 				return scriptTimeout;
 			}
@@ -144,6 +144,29 @@ namespace tech.ironsheep.WebDriver
 			sessionId = System.Guid.NewGuid().ToString();
 
 			Debug.Log( string.Format("started session with id {0}", sessionId ) );
+
+			var request = SimpleJSON.JSON.Parse (body);
+
+			try{
+				var capabilitites = request["capabilities"];
+
+				try{
+					implicitTimeout = Int64.Parse(capabilitites["implicit"]);
+				}
+				catch(Exception e){}
+
+				try{
+					pageLoadTimeout = Int64.Parse(capabilitites["page load"]);
+				}
+				catch(Exception e){}
+
+				try{
+					scriptTimeout = Int64.Parse(capabilitites["script"]);
+				}
+				catch(Exception e){}
+			}
+			catch(Exception e ) {
+			}
 				
 			var reBody = string.Format( "{{ \"sessionId\":\"{0}\",\"capabilities\":{{}} }}", sessionId);
 
@@ -175,6 +198,10 @@ namespace tech.ironsheep.WebDriver
 			}";
 
 			sessionId = null;
+
+			implicitTimeout = 0;
+			pageLoadTimeout = 300000;
+			scriptTimeout = 30000;
 
             if (response != null)
             {

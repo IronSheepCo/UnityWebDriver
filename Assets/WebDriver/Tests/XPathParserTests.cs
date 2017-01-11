@@ -484,6 +484,36 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			EndSession ();
 
+			req = "{\"capabilities\":{\"implicit\":1000, \"page load\":2500, \"script\":456} }";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			session = new WWW (endPoint + "/session", byteReq );
+			yield return session;
+
+			sessionId = SimpleJSON.JSON.Parse (session.text) ["sessionId"];
+
+			Debug.Assert (WebDriverManager.instance.ImplicitTimeout == 1000);
+			Debug.Assert (WebDriverManager.instance.ScriptTimeout == 456);
+			Debug.Assert (WebDriverManager.instance.PageLoadTimeout == 2500);
+
+			EndSession ();
+
+			req = "{\"capabilities\":{\"implicit\":1000} }";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			session = new WWW (endPoint + "/session", byteReq );
+			yield return session;
+
+			sessionId = SimpleJSON.JSON.Parse (session.text) ["sessionId"];
+
+			Debug.Assert (WebDriverManager.instance.ImplicitTimeout == 1000);
+			Debug.Assert (WebDriverManager.instance.ScriptTimeout == 30000);
+			Debug.Assert (WebDriverManager.instance.PageLoadTimeout == 300000);
+
+			EndSession ();
+
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
 
 			Debug.Log ("end timeout tests");
