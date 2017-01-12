@@ -512,6 +512,15 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (WebDriverManager.instance.ScriptTimeout == 30000);
 			Debug.Assert (WebDriverManager.instance.PageLoadTimeout == 300000);
 
+			WWW request = new WWW (endPoint + "/session/" + sessionId + "/timeouts");
+			yield return request;
+
+			var response = SimpleJSON.JSON.Parse (request.text);
+
+			Debug.Assert ( Int64.Parse(response["implicit"]) == 1000);
+			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
+			Debug.Assert ( Int64.Parse(response["page load"]) == 300000);
+
 			EndSession ();
 
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));

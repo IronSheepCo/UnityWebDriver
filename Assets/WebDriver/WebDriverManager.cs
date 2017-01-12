@@ -63,6 +63,8 @@ namespace tech.ironsheep.WebDriver
 			listener.Prefixes.Add ("http://*:4569/");
 
 			StartWebDriver ();
+
+			RegisterInternalCommands ();
 		}
 
 		public void WriteResponse( HttpListenerResponse response, string body, int code )
@@ -408,6 +410,26 @@ namespace tech.ironsheep.WebDriver
 			Regex reg = new Regex (matchArgs);
 
 			commands [command][httpMethod][reg] = callback;
+		}
+
+		private void RegisterInternalCommands()
+		{
+			RegisterCommand ("timeouts", "GET", GetTimeouts, "^$");
+			RegisterCommand ("timeouts", "POST", SetTimeouts, "^$");
+		}
+
+		public bool GetTimeouts( string body, string[] args, HttpListenerResponse response )
+		{
+			string responseBody = string.Format("\"data\":{{\"implicit\":{0}, \"page load\":{1}, \"script\":{2} }}", implicitTimeout, pageLoadTimeout, scriptTimeout);
+
+			WriteResponse (response, responseBody, 200);
+
+			return true;
+		}
+
+		public bool SetTimeouts( string body, string[] args, HttpListenerResponse response )
+		{
+			return true;
 		}
 
 		public string AddElement( Component obj, string uuid )
