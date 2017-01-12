@@ -114,6 +114,17 @@ namespace tech.ironsheep.WebDriver
 			WriteResponse (response, responseBody, 400);
 		}
 
+		public void WriteInvalidArgument( HttpListenerResponse response )
+		{
+			var responseBody = @"{
+				""error"":""invalid argument"",
+				""message"":""The arguments passed to a command are either invalid or malformed."",
+				""stacktrace"":""""
+			}";
+			
+			WriteResponse( response, responseBody, 400 );
+		}
+
 		private void BadSessionId( string body, HttpListenerResponse response )
 		{
 			string responseBody = @"{
@@ -429,6 +440,16 @@ namespace tech.ironsheep.WebDriver
 
 		public bool SetTimeouts( string body, string[] args, HttpListenerResponse response )
 		{
+			//check if body is a valid json
+			var parsedBody = SimpleJSON.JSON.Parse( body );
+
+			if (parsedBody == null || parsedBody ["parameters"] == null) 
+			{
+				WriteInvalidArgument (response);
+
+				return true;
+			}
+
 			return true;
 		}
 
