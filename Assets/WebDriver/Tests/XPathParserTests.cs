@@ -497,6 +497,15 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (WebDriverManager.instance.ScriptTimeout == 456);
 			Debug.Assert (WebDriverManager.instance.PageLoadTimeout == 2500);
 
+			WWW request = new WWW (endPoint + "/session/" + sessionId + "/timeouts");
+			yield return request;
+
+			var response = SimpleJSON.JSON.Parse (request.text);
+
+			Debug.Assert ( Int64.Parse(response["implicit"]) == 1000);
+			Debug.Assert ( Int64.Parse(response["script"]) == 456);
+			Debug.Assert ( Int64.Parse(response["page load"]) == 2500);
+
 			EndSession ();
 
 			req = "{\"capabilities\":{\"implicit\":1000} }";
@@ -512,10 +521,10 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (WebDriverManager.instance.ScriptTimeout == 30000);
 			Debug.Assert (WebDriverManager.instance.PageLoadTimeout == 300000);
 
-			WWW request = new WWW (endPoint + "/session/" + sessionId + "/timeouts");
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts");
 			yield return request;
 
-			var response = SimpleJSON.JSON.Parse (request.text);
+			response = SimpleJSON.JSON.Parse (request.text);
 
 			Debug.Assert ( Int64.Parse(response["implicit"]) == 1000);
 			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
