@@ -7,6 +7,7 @@ using System.Linq;
 
 using tech.ironsheep.WebDriver.Command;
 using tech.ironsheep.WebDriver.XPath;
+using tech.ironsheep.WebDriver.Dispatch;
 
 namespace tech.ironsheep.WebDriver
 {
@@ -94,6 +95,30 @@ namespace tech.ironsheep.WebDriver
 			return findBody;
 		}
 
+		private static IEnumerator ScheduleFindElement( string body, string[] args, HttpListenerResponse response)
+		{
+			float time = 0;
+
+			while (true) {
+				yield return new WaitForSeconds (WebDriverManager.instance.WaitTimeForFindingElements);
+
+				bool found = FindElement (body, args, response);
+
+				if (found == true) {
+					break;
+				}
+
+				time += Time.deltaTime;
+
+				//timedout
+				if (time * 10000 > WebDriverManager.instance.ImplicitTimeout) 
+				{
+					WebDriverManager.instance.WriteElementNotFound (response);
+					break;
+				}
+			}
+		}
+
 		private static bool FindElementFromRoot( string body, List<GameObject> root, HttpListenerResponse response )
 		{
 			FindBody findRequest = ParseFindElementBody (body, response);
@@ -122,9 +147,15 @@ namespace tech.ironsheep.WebDriver
 			//no results found
 			if (found == null) 
 			{
-				WebDriverManager.instance.WriteElementNotFound (response);
-
-				return true;
+				if (WebDriverManager.instance.ImplicitTimeout == 0) 
+				{
+					WebDriverManager.instance.WriteElementNotFound (response);
+					return true;
+				}
+				else 
+				{
+					return false;
+				}
 			}
 
 			string uuid = System.Guid.NewGuid ().ToString ();
@@ -161,9 +192,15 @@ namespace tech.ironsheep.WebDriver
 			//no results found
 			if (found.Count == 0) 
 			{
-				WriteEmptyResult (response);
-
-				return true;
+				if (WebDriverManager.instance.ImplicitTimeout == 0) 
+				{
+					WriteEmptyResult (response);
+					return true;
+				} 
+				else 
+				{
+					return false;
+				}
 			}
 
 			List<string> objs = new List<string> ();
@@ -237,7 +274,45 @@ namespace tech.ironsheep.WebDriver
 			return rootBag;
 		}
 
-		public static bool FindElement( string body, string[] args, HttpListenerResponse response )
+		private static IEnumerator ScheduleFindElement( string body, string[] args, HttpListenerResponse response, Func<string, string[], HttpListenerResponse, bool> callback)
+		{
+			float time = 0;
+
+			while (true) {
+				
+				time += Time.deltaTime;
+
+				//timedout
+				if (time * 10000 > WebDriverManager.instance.ImplicitTimeout) 
+				{
+					WebDriverManager.instance.WriteElementNotFound (response);
+					break;
+				}
+
+				yield return new WaitForSeconds (WebDriverManager.instance.WaitTimeForFindingElements);
+
+				bool found = callback (body, args, response);
+
+				if (found == true) {
+					//we found elements
+					break;
+				}
+			}
+		}
+
+		private static bool InternalFindElement( string body, string[] args, HttpListenerResponse response )
+		{
+			var rootBag = FindStartBag (body, response);
+
+			if (rootBag == null) 
+			{
+				return false;
+			}
+
+			return FindElementFromRoot (body, rootBag, response);
+		}
+
+		public static bool FindElement( string body, string[] args, HttpListenerResponse response)
 		{
 			var rootBag = FindStartBag (body, response);
 
@@ -246,7 +321,26 @@ namespace tech.ironsheep.WebDriver
 				return true;
 			}
 
-			return FindElementFromRoot (body, rootBag, response);
+			bool found =  FindElementFromRoot (body, rootBag, response);
+
+			if( WebDriverManager.instance.ImplicitTimeout != 0 && found == false )
+			{
+				MainDispatcher.ExecuteCoroutine( ScheduleFindElement( body, args, response, InternalFindElement ) );
+			}
+
+			return true;
+		}
+
+		private static bool InternalFindElements( string body, string[] args, HttpListenerResponse response )
+		{
+			var rootBag = FindStartBag (body, response);
+
+			if (rootBag == null) 
+			{
+				return false;
+			}
+
+			return FindElementsFromRoot (body, rootBag, response);
 		}
 
 		public static bool FindElements( string body, string[] args, HttpListenerResponse response )
@@ -255,10 +349,36 @@ namespace tech.ironsheep.WebDriver
 
 			if (rootBag == null) 
 			{
+				if (WebDriverManager.instance.ImplicitTimeout != 0) 
+				{
+					MainDispatcher.ExecuteCoroutine (ScheduleFindElement (body, args, response, InternalFindElements));
+				}
+
 				return true;
 			}
 
-			return FindElementsFromRoot (body, rootBag, response);
+			bool found = FindElementsFromRoot (body, rootBag, response);
+
+			if( WebDriverManager.instance.ImplicitTimeout != 0 && found == false )
+			{
+				MainDispatcher.ExecuteCoroutine( ScheduleFindElement( body, args, response, InternalFindElements ) );
+			}
+
+			return true;
+		}
+
+		private static bool InternalFindElementFromElement( string body, string[] args, HttpListenerResponse response )
+		{
+			string elementId = args [0].Replace("\"", "");
+
+			GameObject root = WebDriverManager.instance.GetElement (elementId).gameObject;
+
+			if (root == null) 
+			{
+				return false;
+			}
+
+			return FindElementFromRoot( body, new List<GameObject>(){ root }, response );
 		}
 
 		public static bool FindElementFromElement( string body, string[] args, HttpListenerResponse response )
@@ -269,10 +389,40 @@ namespace tech.ironsheep.WebDriver
 
 			if (root == null) 
 			{
-				WebDriverManager.instance.WriteElementNotFound (response);
+				if (WebDriverManager.instance.ImplicitTimeout == 0) 
+				{
+					WebDriverManager.instance.WriteElementNotFound (response);
+				}
+				else 
+				{
+					MainDispatcher.ExecuteCoroutine( ScheduleFindElement( body, args, response, InternalFindElementFromElement ) );
+				}
+
+				return true;
 			}
 
-			return FindElementFromRoot( body, new List<GameObject>(){ root }, response );
+			bool found = FindElementFromRoot( body, new List<GameObject>(){ root }, response );
+
+			if( WebDriverManager.instance.ImplicitTimeout != 0 && found == false )
+			{
+				MainDispatcher.ExecuteCoroutine( ScheduleFindElement( body, args, response, InternalFindElementFromElement ) );
+			}
+
+			return true;
+		}
+
+		private static bool InternalFindElementsFromElement( string body, string[] args, HttpListenerResponse response )
+		{
+			string elementId = args [0].Replace("\"", "");
+
+			GameObject root = WebDriverManager.instance.GetElement (elementId).gameObject;
+
+			if (root == null) 
+			{
+				return false;
+			}
+
+			return FindElementsFromRoot (body, new List<GameObject>(){root}, response);
 		}
 
 		public static bool FindElementsFromElement( string body, string[] args, HttpListenerResponse response )
@@ -283,10 +433,26 @@ namespace tech.ironsheep.WebDriver
 
 			if (root == null) 
 			{
-				WebDriverManager.instance.WriteElementNotFound (response);
+				if (WebDriverManager.instance.ImplicitTimeout == 0) 
+				{
+					WebDriverManager.instance.WriteElementNotFound (response);
+				}
+				else 
+				{
+					MainDispatcher.ExecuteCoroutine( ScheduleFindElement( body, args, response, InternalFindElementsFromElement ) );
+				}
+
+				return true;
 			}
 
-			return FindElementsFromRoot (body, new List<GameObject>(){root}, response);
+			bool found = FindElementsFromRoot (body, new List<GameObject>(){root}, response);
+
+			if( WebDriverManager.instance.ImplicitTimeout != 0 && found == false )
+			{
+				MainDispatcher.ExecuteCoroutine( ScheduleFindElement( body, args, response, InternalFindElementsFromElement ) );
+			}
+
+			return true;
 		}
 	}
 }

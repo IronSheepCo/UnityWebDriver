@@ -592,7 +592,6 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert ( error == "invalid argument" );
 
 
-
 			req = "{\"parameters\":{\"implicit\":34567}}";
 
 			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
@@ -641,7 +640,73 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			Debug.Log ("end timeout tests");
 
-			//EndSession();
+			StartCoroutine (FindElementsWithTimeouts ());
+		}
+
+		private IEnumerator CreateButton( string name, float when )
+		{
+			yield return new WaitForSeconds (when);
+
+			GameObject go = new GameObject (name);
+			go.AddComponent<Button> ();
+		}
+
+		private IEnumerator FindElementsWithTimeouts()
+		{
+			Debug.Log ("start find elements timeouts tests");
+
+			float startTime = Time.realtimeSinceStartup;
+
+			string endPoint = "http://localhost:4569";
+
+			string req = "{\"capabilities\":{\"implicit\":2500, \"page load\":1500, \"script\":1500} }";
+
+			byte[] byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			WWW session = new WWW (endPoint + "/session", byteReq );
+			yield return session;
+
+			sessionId = SimpleJSON.JSON.Parse (session.text) ["sessionId"];
+
+			//set creation of element in 1.5 seconds
+			StartCoroutine( CreateButton("TimeoutElement", 1.5f) );
+
+			req = "{\"using\":\"xpath\",\"value\":\"button[@name=\\\"TimeoutElement\\\"]\"}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			WWW element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			var data = SimpleJSON.JSON.Parse (element.text) ["data"];
+
+			var first = data [0];
+
+			name = first ["name"].ToString ();
+			string thirdButtonId = first [FindElementCommands.WebElementIdentifierKey];
+
+			Debug.Assert (name.Equals( "\"TimeoutElement\"" ));
+
+
+			//set creation of element in 3 seconds
+			StartCoroutine( CreateButton("54", 3f) );
+
+			req = "{\"using\":\"xpath\",\"value\":\"button[@name=\\\"54\\\"]\"}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			element = new WWW (string.Format ("{0}/session/{1}/element", endPoint, sessionId), byteReq);
+			yield return element;
+
+			data = SimpleJSON.JSON.Parse (element.text) ["error"];
+
+			Debug.Assert (data.Value == "no such element");
+
+			EndSession ();
+
+			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
+
+			Debug.Log ("end find elements timeout tests");
 		}
 
         private void EndSession()
