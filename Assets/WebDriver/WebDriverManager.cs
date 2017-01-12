@@ -56,6 +56,12 @@ namespace tech.ironsheep.WebDriver
 			}
 		}
 
+		public float WaitTimeForFindingElements{
+			get{
+				return 0.2f;
+			}
+		}
+
 		private WebDriverManager()
 		{
 			listener = new HttpListener ();
