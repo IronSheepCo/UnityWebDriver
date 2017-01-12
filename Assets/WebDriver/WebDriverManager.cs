@@ -425,8 +425,8 @@ namespace tech.ironsheep.WebDriver
 
 		private void RegisterInternalCommands()
 		{
-			RegisterCommand ("timeouts", "GET", GetTimeouts, "^$");
-			RegisterCommand ("timeouts", "POST", SetTimeouts, "^$");
+			RegisterCommand ("timeouts", "GET", GetTimeouts);
+			RegisterCommand ("timeouts", "POST", SetTimeouts);
 		}
 
 		public bool GetTimeouts( string body, string[] args, HttpListenerResponse response )
@@ -449,6 +449,43 @@ namespace tech.ironsheep.WebDriver
 
 				return true;
 			}
+
+			SimpleJSON.JSONClass pr = parsedBody["parameters"].AsObject;
+
+			List<string> timeouts = new List<string> ();
+			timeouts.Add ("implicit");
+			timeouts.Add ("page load");
+			timeouts.Add ("script");
+
+			foreach (KeyValuePair<string, SimpleJSON.JSONNode> node in pr) 
+			{
+				string key = node.Key;
+				int value = node.Value.AsInt;
+
+				if (timeouts.Contains (key) == false || 
+					value < 0) 
+					//also need to add this restriction at some point 
+					//|| value > (1<<64 - 1) ) 
+				{
+					WriteInvalidArgument (response);
+					return true;
+				}
+
+				//set the timeout
+				if (key == "implicit") {
+					implicitTimeout = value;
+				}
+
+				if (key == "page load") {
+					pageLoadTimeout = value;
+				}
+
+				if (key == "script") {
+					scriptTimeout = value;
+				}
+			}
+
+			WriteEmptyAlgorithmResponse (response);
 
 			return true;
 		}

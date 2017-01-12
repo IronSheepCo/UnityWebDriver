@@ -530,6 +530,111 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
 			Debug.Assert ( Int64.Parse(response["page load"]) == 300000);
 
+			//pushing timeouts with invalid arguments
+			req = "asd";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts", byteReq );
+			yield return request;
+
+			string error = SimpleJSON.JSON.Parse( request.text) ["error"];
+
+			Debug.Assert ( error == "invalid argument" );
+
+			req = "{}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts", byteReq );
+			yield return request;
+
+			error = SimpleJSON.JSON.Parse( request.text) ["error"];
+
+			Debug.Assert ( error == "invalid argument" );
+
+
+			req = "{\"parameters:{}\"}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts", byteReq );
+			yield return request;
+
+			error = SimpleJSON.JSON.Parse( request.text) ["error"];
+
+			Debug.Assert ( error == "invalid argument" );
+
+
+
+			req = "{\"parameters\":{\"aasd\":10000}}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts", byteReq );
+			yield return request;
+
+			error = SimpleJSON.JSON.Parse( request.text) ["error"];
+
+			Debug.Assert ( error == "invalid argument" );
+
+
+
+			req = "{\"parameters\":{\"implicit\":-232}}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts", byteReq );
+			yield return request;
+
+			error = SimpleJSON.JSON.Parse( request.text) ["error"];
+
+			Debug.Assert ( error == "invalid argument" );
+
+
+
+			req = "{\"parameters\":{\"implicit\":34567}}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts", byteReq );
+			yield return request;
+
+			error = SimpleJSON.JSON.Parse( request.text) ["data"];
+
+			Debug.Assert (error == "null");
+			Debug.Assert (WebDriverManager.instance.ImplicitTimeout == 34567);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts");
+			yield return request;
+
+			response = SimpleJSON.JSON.Parse (request.text);
+
+			Debug.Assert ( Int64.Parse(response["implicit"]) == 34567);
+			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
+			Debug.Assert ( Int64.Parse(response["page load"]) == 300000);
+
+			req = "{\"parameters\":{\"implicit\":34567, \"page load\":435}}";
+
+			byteReq = ASCIIEncoding.ASCII.GetBytes (req);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts", byteReq );
+			yield return request;
+
+			error = SimpleJSON.JSON.Parse( request.text) ["data"];
+
+			Debug.Assert (error == "null");
+			Debug.Assert (WebDriverManager.instance.ImplicitTimeout == 34567);
+
+			request = new WWW (endPoint + "/session/" + sessionId + "/timeouts");
+			yield return request;
+
+			response = SimpleJSON.JSON.Parse (request.text);
+
+			Debug.Assert ( Int64.Parse(response["implicit"]) == 34567);
+			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
+			Debug.Assert ( Int64.Parse(response["page load"]) == 435);
+
 			EndSession ();
 
 			Debug.Log ("time " + (Time.realtimeSinceStartup-startTime));
