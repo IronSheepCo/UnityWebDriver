@@ -24,6 +24,7 @@ namespace tech.ironsheep.WebDriver.Tests
 		private void ParserTests()
 		{
 			Debug.Log ("starting parser tests");
+			Debug.LogError ("Asdasdasdas");
 
 			var parser = new XPathParser ();
 
@@ -502,9 +503,9 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			var response = SimpleJSON.JSON.Parse (request.text);
 
-			Debug.Assert ( Int64.Parse(response["implicit"]) == 1000);
-			Debug.Assert ( Int64.Parse(response["script"]) == 456);
-			Debug.Assert ( Int64.Parse(response["page load"]) == 2500);
+			Debug.Assert ( Int64.Parse(response["data"]["implicit"]) == 1000);
+			Debug.Assert ( Int64.Parse(response["data"]["script"]) == 456);
+			Debug.Assert ( Int64.Parse(response["data"]["page load"]) == 2500);
 
 			EndSession ();
 
@@ -526,9 +527,9 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			response = SimpleJSON.JSON.Parse (request.text);
 
-			Debug.Assert ( Int64.Parse(response["implicit"]) == 1000);
-			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
-			Debug.Assert ( Int64.Parse(response["page load"]) == 300000);
+			Debug.Assert ( Int64.Parse(response["data"]["implicit"]) == 1000);
+			Debug.Assert ( Int64.Parse(response["data"]["script"]) == 30000);
+			Debug.Assert ( Int64.Parse(response["data"]["page load"]) == 300000);
 
 			//pushing timeouts with invalid arguments
 			req = "asd";
@@ -609,9 +610,9 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			response = SimpleJSON.JSON.Parse (request.text);
 
-			Debug.Assert ( Int64.Parse(response["implicit"]) == 34567);
-			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
-			Debug.Assert ( Int64.Parse(response["page load"]) == 300000);
+			Debug.Assert ( Int64.Parse(response["data"]["implicit"]) == 34567);
+			Debug.Assert ( Int64.Parse(response["data"]["script"]) == 30000);
+			Debug.Assert ( Int64.Parse(response["data"]["page load"]) == 300000);
 
 			req = "{\"parameters\":{\"implicit\":34567, \"page load\":435}}";
 
@@ -630,9 +631,9 @@ namespace tech.ironsheep.WebDriver.Tests
 
 			response = SimpleJSON.JSON.Parse (request.text);
 
-			Debug.Assert ( Int64.Parse(response["implicit"]) == 34567);
-			Debug.Assert ( Int64.Parse(response["script"]) == 30000);
-			Debug.Assert ( Int64.Parse(response["page load"]) == 435);
+			Debug.Assert ( Int64.Parse(response["data"]["implicit"]) == 34567);
+			Debug.Assert ( Int64.Parse(response["data"]["script"]) == 30000);
+			Debug.Assert ( Int64.Parse(response["data"]["page load"]) == 435);
 
 			EndSession ();
 

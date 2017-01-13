@@ -437,7 +437,7 @@ namespace tech.ironsheep.WebDriver
 
 		public bool GetTimeouts( string body, string[] args, HttpListenerResponse response )
 		{
-			string responseBody = string.Format("\"data\":{{\"implicit\":{0}, \"page load\":{1}, \"script\":{2} }}", implicitTimeout, pageLoadTimeout, scriptTimeout);
+			string responseBody = string.Format("{{ \"data\":{{\"implicit\":{0}, \"page load\":{1}, \"script\":{2} }} }}", implicitTimeout, pageLoadTimeout, scriptTimeout);
 
 			WriteResponse (response, responseBody, 200);
 
