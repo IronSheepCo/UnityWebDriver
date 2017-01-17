@@ -24,7 +24,6 @@ namespace tech.ironsheep.WebDriver.Tests
 		private void ParserTests()
 		{
 			Debug.Log ("starting parser tests");
-			Debug.LogError ("Asdasdasdas");
 
 			var parser = new XPathParser ();
 
