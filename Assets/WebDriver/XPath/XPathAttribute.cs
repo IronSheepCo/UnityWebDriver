@@ -58,9 +58,14 @@ namespace tech.ironsheep.WebDriver.XPath
 
 				if ( propertyInfo != null) 
 				{
-					if (ValueToMatch == propertyInfo.GetValue (comp, null).ToString()) 
+					if (propertyInfo.CanRead ) 
 					{
-						filtered.Add (go);
+						object val = propertyInfo.GetValue (comp, null);
+
+						if (val != null && ValueToMatch == val.ToString ()) 
+						{
+							filtered.Add (go);
+						}
 					}
 
 					continue;
@@ -71,7 +76,9 @@ namespace tech.ironsheep.WebDriver.XPath
 
 				if ( fieldInfo != null) 
 				{
-					if (ValueToMatch == fieldInfo.GetValue (comp).ToString()) 
+					object val = fieldInfo.GetValue (comp);
+
+					if ( val != null && ValueToMatch == val.ToString()) 
 					{
 						filtered.Add (go);
 					}
