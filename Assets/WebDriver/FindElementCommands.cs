@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Net;
 using System;
 using System.Linq;
+using System.Text;
 
+using tech.ironsheep.WebDriver;
 using tech.ironsheep.WebDriver.Command;
 using tech.ironsheep.WebDriver.XPath;
 using tech.ironsheep.WebDriver.Dispatch;
@@ -162,9 +164,22 @@ namespace tech.ironsheep.WebDriver
 
 			uuid = WebDriverManager.instance.AddElement (found, uuid);
 
-			string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", found.name, WebElementIdentifierKey, uuid);
+			Dictionary<string, string> attributes = ComponentAttributes.Attributes (found.GetType (), found);
 
-			WriteElementList (response, new List<string>{ jsonRepr });
+			StringBuilder jsonRepr = new StringBuilder ("{");
+
+			jsonRepr.AppendFormat ("\"name\":\"{0}\",", found.name);
+
+			foreach (var attr in attributes) 
+			{
+				jsonRepr.AppendFormat( "\"{0}\":\"{1}\", ", attr.Key, attr.Value );
+			}
+
+			jsonRepr.AppendFormat( "\"{0}\":\"{1}\"", WebElementIdentifierKey, uuid );
+
+			jsonRepr.Append("}");
+
+			WriteElementList (response, new List<string>{ jsonRepr.ToString() });
 
 			return true;
 		}
@@ -213,9 +228,22 @@ namespace tech.ironsheep.WebDriver
 
 				uuid = WebDriverManager.instance.AddElement (go, uuid);
 
-				string jsonRepr = string.Format ("{{\"name\":\"{0}\", \"{1}\":\"{2}\"}}", go.name, WebElementIdentifierKey, uuid);
+				Dictionary<string, string> attributes = ComponentAttributes.Attributes (go.GetType (), go);
 
-				objs.Add (jsonRepr);
+				StringBuilder jsonRepr = new StringBuilder ("{");
+
+				jsonRepr.AppendFormat ("\"name\":\"{0}\",", go.name);
+
+				foreach (var attr in attributes) 
+				{
+					jsonRepr.AppendFormat( "\"{0}\":\"{1}\", ", attr.Key, attr.Value );
+				}
+
+				jsonRepr.AppendFormat( "\"{0}\":\"{1}\"", WebElementIdentifierKey, uuid );
+
+				jsonRepr.Append("}");
+
+				objs.Add (jsonRepr.ToString());
 			}
 
 			WriteElementList (response, objs);
