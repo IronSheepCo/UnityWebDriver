@@ -17,6 +17,7 @@ namespace tech.ironsheep.WebDriver
 			WebDriverManager.instance.RegisterCommand ("element", "GET", ClickElement, "^[^/]*/click$");
 			WebDriverManager.instance.RegisterCommand ("element", "POST", SendKeys, "^[^/]*/value$");
 			WebDriverManager.instance.RegisterCommand ("element", "GET", HighlightElement, "^[^/]*/highlight$");
+			WebDriverManager.instance.RegisterCommand ("element", "GET", IsVisible, "^[^/]*/visible$");
 		}
 
 		private static Material _highlightMat;
@@ -92,7 +93,7 @@ namespace tech.ironsheep.WebDriver
 				{
 					change = -change;
 				}
-				
+
 				_highlightMat.SetColor ("_Color", new Color (1.0f, 0.0f, 0.0f, a));
 
 				a += change;
@@ -187,11 +188,6 @@ namespace tech.ironsheep.WebDriver
 			{
 				t.GetWorldCorners (corners);
 
-				for (int i = 0; i<4; i++) 
-				{
-					corners[i] = cam.WorldToScreenPoint (corners[i]);
-				}
-
 				if (corners [0] [0] < xMin)
 					xMin = corners [0] [0];
 
@@ -208,7 +204,7 @@ namespace tech.ironsheep.WebDriver
 				{
 					if (c.z < zMin)
 						zMin = c.z;
-					
+
 					if (c.z > zMax)
 						zMax = c.z;
 				}
@@ -221,9 +217,6 @@ namespace tech.ironsheep.WebDriver
 
 			Vector3 topLeftCorner = new Vector3 (xMin, yMin, zMin);
 			Vector3 bottomRightCorner = new Vector3 (xMax, yMax, zMin);
-
-			topLeftCorner = cam.ScreenToWorldPoint (topLeftCorner);
-			bottomRightCorner = cam.ScreenToWorldPoint (bottomRightCorner);
 
 			Vector3 scale = selection.transform.localScale;
 			scale.x = bottomRightCorner.x - topLeftCorner.x;
@@ -239,6 +232,156 @@ namespace tech.ironsheep.WebDriver
 			selection.GetComponent<MeshRenderer> ().material = _highlightMat;
 
 			MainDispatcher.ExecuteCoroutine (HighlightStuff());
+
+			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
+
+			return true;
+		}
+
+		public static bool IsVisible( string body, string[] args, HttpListenerResponse response )
+		{
+			Component comp = GetComponent (args, response);
+
+			if (comp == null) 
+			{
+				return true;
+			}
+
+			string responseBody = "";
+
+			//highlight the element now
+			float xMin = float.MaxValue;
+			float xMax = float.MinValue;
+			float yMin = float.MaxValue;
+			float yMax = float.MinValue;
+			float zMin = float.MaxValue;
+			float zMax = float.MinValue;
+
+			GameObject go = comp.gameObject;
+
+			//list with all the bounds
+			List<Bounds> bounds = new List<Bounds> ();
+			List<Transform> transforms = new List<Transform> ();
+
+			//bounds from colliders
+			Collider[] colliders = go.GetComponentsInChildren<Collider> ();
+
+			foreach( var c in colliders )
+			{
+				bounds.Add (c.bounds);
+				transforms.Add (c.gameObject.transform);
+			}
+
+			//bounds from renderers
+			Renderer[] renderers = go.GetComponentsInChildren<Renderer> ();
+
+			foreach (var r in renderers) 
+			{
+				bounds.Add (r.bounds);
+				transforms.Add (r.gameObject.transform);
+			}
+
+			bool visible = false;
+
+			//for each camera in the scene
+			foreach (Camera cam in Camera.allCameras) {
+
+				if (cam.isActiveAndEnabled == false) 
+				{
+					continue;
+				}
+
+				//check if the current layer is rendered by it
+				if ((cam.cullingMask & (1 << go.layer)) == 0) 
+				{
+					continue;
+				}
+
+				xMin = yMin = zMin = float.MaxValue;
+				xMax = yMax = zMax = float.MinValue;
+
+				//for each bounds get the min and max
+				//expand the bounding box
+				var transformEnumerator = transforms.GetEnumerator ();
+
+				foreach (Bounds bound in bounds) {
+					transformEnumerator.MoveNext ();
+
+					Vector3 min = cam.WorldToViewportPoint (bound.min);
+					Vector3 max = cam.WorldToViewportPoint (bound.max);
+
+					if (min.x < xMin)
+						xMin = min.x;
+
+					if (min.y < yMin)
+						yMin = min.y;
+
+					if (max.x > xMax)
+						xMax = max.x;
+
+					if (max.y > yMax)
+						yMax = max.y;
+
+					if (min.z < zMin)
+						zMin = min.z;
+
+					if (max.z > zMax)
+						zMax = max.z;
+				}
+				RectTransform[] rectTransforms = go.GetComponentsInChildren<RectTransform> ();
+
+				Vector3[] corners = new Vector3[4];
+
+				foreach (var t in rectTransforms) {
+
+					t.GetWorldCorners (corners);
+
+					for (int i = 0; i < corners.Length; i++) {
+						corners [i] = cam.WorldToViewportPoint (corners [i]);
+					}
+
+					if (corners [0] [0] < xMin)
+						xMin = corners [0] [0];
+
+					if (corners [0] [1] < yMin)
+						yMin = corners [0] [1];
+
+					if (corners [2] [0] > xMax)
+						xMax = corners [3] [0];
+
+					if (corners [2] [1] > yMax)
+						yMax = corners [2] [1];
+
+					foreach (var c in corners) {
+						if (c.z < zMin)
+							zMin = c.z;
+
+						if (c.z > zMax)
+							zMax = c.z;
+					}
+				}
+
+				//if the element is partial in the screen
+				//then it is visible
+
+				if (xMin <= 1 && xMax >= 0 &&
+					yMin <= 1 && yMax >= 0 &&
+					zMin <= cam.farClipPlane && zMax >= cam.nearClipPlane ) 
+				{
+					visible = true;
+					break;
+				}
+
+			}
+
+			if( visible )
+			{
+				responseBody = "{\"data\":true}";
+			} 
+			else 
+			{
+				responseBody = "{\"data\":false}";
+			}
 
 			WebDriverManager.instance.WriteResponse (response, responseBody, 200);
 
