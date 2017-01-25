@@ -93,7 +93,7 @@ namespace tech.ironsheep.WebDriver
 				{
 					change = -change;
 				}
-
+				
 				_highlightMat.SetColor ("_Color", new Color (1.0f, 0.0f, 0.0f, a));
 
 				a += change;
@@ -158,8 +158,8 @@ namespace tech.ironsheep.WebDriver
 			{
 				transformEnumerator.MoveNext ();
 
-				Vector3 min = transformEnumerator.Current.TransformPoint(bound.min);
-				Vector3 max = transformEnumerator.Current.TransformPoint(bound.max);
+				Vector3 min = bound.min;
+				Vector3 max = bound.max;
 
 				if (min.x < xMin)
 					xMin = min.x;
@@ -204,7 +204,7 @@ namespace tech.ironsheep.WebDriver
 				{
 					if (c.z < zMin)
 						zMin = c.z;
-
+					
 					if (c.z > zMax)
 						zMax = c.z;
 				}
@@ -223,10 +223,13 @@ namespace tech.ironsheep.WebDriver
 			scale.y = bottomRightCorner.y - topLeftCorner.y;
 
 			Vector3 position = selection.transform.position;
-			position.z = zMin;
+			position.x = go.transform.position.x;
+			position.y = go.transform.position.y;
+			position.z = zMin-0.1f;
 
 			selection.transform.localScale = scale;
 			selection.transform.position = position;
+			selection.layer = go.layer;
 
 			_highlightMat = GameObject.Instantiate( Resources.Load<Material> ("WDHighlight") ); 
 			selection.GetComponent<MeshRenderer> ().material = _highlightMat;
