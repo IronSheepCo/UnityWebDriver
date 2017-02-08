@@ -67,6 +67,13 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (tokens [1].Desc == "WHITE_SPACE");
 			Debug.Assert (tokens [2].Desc == "IDENTIFIER");
 
+			tokens = lex.Tokenize ("//uilabel/uibutton//altceva");
+
+			Debug.Assert (tokens.Count == 6 );
+			Debug.Assert (tokens [3].Content == "uibutton");
+			Debug.Assert (tokens [3].Desc == "IDENTIFIER");
+			Debug.Assert (tokens [2].Desc == "CHILD");
+
 			tokens = lex.Tokenize ("//label[@text=\"ceva\"]");
 
 			Debug.Assert (tokens.Count == 7);
@@ -76,6 +83,41 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (tokens [4].Desc == "EQUAL");
 			Debug.Assert (tokens [5].Content == "ceva");
 			Debug.Assert (tokens [5].Desc == "STRING");
+
+			tokens = lex.Tokenize ("//label[@text=\"ceva\" and @tre=\"23232\"]");
+
+			Debug.Assert (tokens.Count == 13);
+			Debug.Assert (tokens [3].Content == "@text");
+			Debug.Assert (tokens [3].Desc == "ATTRIBUTE");
+			Debug.Assert (tokens [4].Content == "=");
+			Debug.Assert (tokens [4].Desc == "EQUAL");
+			Debug.Assert (tokens [5].Content == "ceva");
+			Debug.Assert (tokens [5].Desc == "STRING");
+			Debug.Assert (tokens [7].Content == "and");
+			Debug.Assert (tokens [7].Desc == "AND");
+			Debug.Assert (tokens [11].Content == "23232");
+			Debug.Assert (tokens [11].Desc == "STRING");
+
+			tokens = lex.Tokenize ("//label[@text=\"ceva\" and @tre=\"23232\" and @rez=\"ultim and\"]");
+
+			Debug.Assert (tokens.Count == 19);
+			Debug.Assert (tokens [3].Content == "@text");
+			Debug.Assert (tokens [3].Desc == "ATTRIBUTE");
+			Debug.Assert (tokens [4].Content == "=");
+			Debug.Assert (tokens [4].Desc == "EQUAL");
+			Debug.Assert (tokens [5].Content == "ceva");
+			Debug.Assert (tokens [5].Desc == "STRING");
+			Debug.Assert (tokens [7].Content == "and");
+			Debug.Assert (tokens [7].Desc == "AND");
+			Debug.Assert (tokens [11].Content == "23232");
+			Debug.Assert (tokens [11].Desc == "STRING");
+			Debug.Assert (tokens [13].Content == "and");
+			Debug.Assert (tokens [13].Desc == "AND");
+			Debug.Assert (tokens [15].Content == "@rez");
+			Debug.Assert (tokens [15].Desc == "ATTRIBUTE");
+			Debug.Assert (tokens [17].Content == "ultim and");
+			Debug.Assert (tokens [17].Desc == "STRING");
+
 		}
 
 		private void ParserTests()
