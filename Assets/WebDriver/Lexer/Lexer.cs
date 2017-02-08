@@ -15,7 +15,7 @@ namespace tech.ironsheep.WebDriver.Lexer
 			AddTokenDef (new TokenDef ("^and|AND", "AND") );
 			AddTokenDef (new TokenDef (@"^\[", "OPEN_PREDICATE") );
 			AddTokenDef (new TokenDef ("^]", "END_PREDICATE") );
-			AddTokenDef (new TokenDef ("^@[a-zA-Z0-9_-]+", "ATTRIBUTE") );
+			AddTokenDef (new TokenDef ("^@([a-zA-Z0-9_-]+)", "ATTRIBUTE") );
 			AddTokenDef (new TokenDef ("^=", "EQUAL") );
 			AddTokenDef (new TokenDef ("^~", "SIMILAR") );
 			AddTokenDef (new TokenDef ("^[0-9]+", "NUMBER") );
