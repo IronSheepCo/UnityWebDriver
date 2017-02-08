@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
 
+using tech.ironsheep.WebDriver.Lexer;
+
 namespace tech.ironsheep.WebDriver.XPath
 {
 	public class XPathParser{
@@ -23,6 +25,8 @@ namespace tech.ironsheep.WebDriver.XPath
 		private Dictionary<string, Type> classNameToType = new Dictionary<string, Type> ();
 
 		private Type lastTypeUsed;
+
+		private Lexer.Lexer _lexer = new Lexer.Lexer ();
 
 		public XPathParser()
 		{
@@ -54,91 +58,120 @@ namespace tech.ironsheep.WebDriver.XPath
 				xPath = "//" + xPath;
 			}
 
+			List<Token> tokens = _lexer.Tokenize (xPath);
+
 			int currentIndex = 0;
-			int length = xPath.Length;
 
-			//use path to get the nodes and the 
-			//attributes
-			while (currentIndex < length) 
+			while (currentIndex < tokens.Count) 
 			{
-				XPathNode newNode = new XPathNode ();
+				//searching for ancestry
+				XPathNode newNode = new XPathNode();
+				newNode.IsChild = true;
 
-				//we have a node that's not a child
-				if (xPath [currentIndex] == '/' && xPath [currentIndex + 1] == '/') 
+				if (tokens [currentIndex].Desc == "ANCESTOR") 
 				{
 					newNode.IsChild = false;
-
-					currentIndex += 2;
 				}
 
-				if (xPath [currentIndex] == '/' && xPath [currentIndex + 1] != '/') 
-				{
-					newNode.IsChild = true;
+				currentIndex++;
 
+				while (tokens [currentIndex].Desc == "WHITE_SPACE") 
+				{
 					currentIndex++;
 				}
 
-				//get the node
-				int endIndex = xPath.IndexOf( "/", currentIndex );
+				newNode.TagName = tokens [currentIndex].Content;
 
-				//end of string
-				if (endIndex == -1) 
+				currentIndex++;
+
+				while (currentIndex < tokens.Count && tokens [currentIndex].Desc == "WHITE_SPACE") 
 				{
-					endIndex = xPath.Length;
+					currentIndex++;
 				}
-						
-				//node info here
-				string nodeInfo = xPath.Substring (currentIndex, endIndex-currentIndex);
 
-				currentIndex = endIndex;
-
-				//look for predicates
-				if (nodeInfo.Contains ("[")) 
+				//check for attributes
+				if (currentIndex < tokens.Count && tokens [currentIndex].Desc == "OPEN_PREDICATE") 
 				{
-					//get the attribute infor from it
-					int predicateStartIndex = nodeInfo.IndexOf("[")+1;
-					int predicateEndIndex = nodeInfo.IndexOf ("]");
-
-					//malformed predicate
-					if (predicateEndIndex == -1) 
+					//maybe the input is broken and we don't have 
+					//a closing bracket
+					while( currentIndex < tokens.Count && tokens [currentIndex].Desc != "END_PREDICATE" )
 					{
-						predicateEndIndex = nodeInfo.Length;
-					}
+						currentIndex++;
 
-					string predicates = nodeInfo.Substring (predicateStartIndex, predicateEndIndex - predicateStartIndex);
-
-					//need to split the predicate by AND
-					//we only support AND at the moment
-					var splitPredicates = predicates.Split( new string[]{ "and" }, StringSplitOptions.RemoveEmptyEntries );
-
-					foreach (var predicate in splitPredicates) 
-					{
-						var trimedPredicate = predicate.Trim ();
-
-						//the predicate is an attributes
-						if (trimedPredicate.StartsWith ("@")) 
+						while (currentIndex < tokens.Count && tokens [currentIndex].Desc == "WHITE_SPACE") 
 						{
-							var attribute = XPathAttribute.fromString (trimedPredicate);
-
-							newNode.predicates.Add (attribute);
+							currentIndex++;
 						}
 
-						int predicateNumber;
-						// the predicate is a number in the array
-						if ( int.TryParse(trimedPredicate, out predicateNumber) ) 
+						//number
+						if (tokens [currentIndex].Desc == "NUMBER") 
 						{
 							var numberPredicate = new XPathNumberPredicate ();
-							numberPredicate.Number = predicateNumber;
+							numberPredicate.Number = int.Parse( tokens[ currentIndex ].Content );
 
 							newNode.predicates.Add (numberPredicate);
+
+							currentIndex++;
+
+							while (currentIndex < tokens.Count && tokens [currentIndex].Desc == "WHITE_SPACE") 
+							{
+								currentIndex++;
+							}
+
+							//we have some junk in here
+							//we gonna parse until here and bail
+							if (tokens [currentIndex].Desc != "END_PREDICATE") 
+							{
+								ret.Add (newNode);
+								break;
+							}
+						}
+
+						//attribute
+						if (tokens [currentIndex].Desc == "ATTRIBUTE") 
+						{
+							XPathAttribute attribute = new XPathAttribute ();
+							attribute.Name = tokens [currentIndex].Content;
+							newNode.predicates.Add (attribute);
+
+							currentIndex++;
+
+							while (currentIndex < tokens.Count && tokens [currentIndex].Desc == "WHITE_SPACE") 
+							{
+								currentIndex++;
+							}
+
+							//maybe we have a test for existence of attribute
+							if (tokens [currentIndex].Desc != "END_PREDICATE") {
+
+								//how to compare
+								if (tokens [currentIndex].Desc == "EQUAL") {
+								
+								}
+
+								currentIndex++;
+
+								while (currentIndex < tokens.Count && tokens [currentIndex].Desc == "WHITE_SPACE") {
+									currentIndex++;
+								}
+
+								attribute.ValueToMatch = tokens [currentIndex].Content;
+
+								currentIndex++;
+
+								while (currentIndex < tokens.Count && tokens [currentIndex].Desc == "WHITE_SPACE") {
+									currentIndex++;
+								}
+
+								if (currentIndex < tokens.Count && tokens [currentIndex].Desc == "AND") {
+									currentIndex++;
+								}
+							}
 						}
 					}
-						
-					//we get the node tag name
-					nodeInfo = nodeInfo.Substring (0, predicateStartIndex-1);
-				}
 
-				newNode.TagName = nodeInfo;
+					currentIndex ++;
+				}
 
 				ret.Add (newNode);
 			}
