@@ -2,10 +2,12 @@
 using UnityEngine.UI;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
 using tech.ironsheep.WebDriver.XPath;
+using tech.ironsheep.WebDriver.Lexer;
 
 namespace tech.ironsheep.WebDriver.Tests
 {
@@ -15,10 +17,65 @@ namespace tech.ironsheep.WebDriver.Tests
 
 		// Use this for initialization
 		void Start () {
+			LexerTests ();
 			ParserTests ();
 			ParserEvaluateTest ();
 
 			StartCoroutine( FindCommands () );
+		}
+
+		private void LexerTests()
+		{
+			Lexer.Lexer lex = new Lexer.Lexer ();
+
+			List<Token> tokens = lex.Tokenize ("//uibutton");
+
+			Debug.Assert (tokens.Count == 2);
+			Debug.Assert (tokens [0].Content == "//");
+			Debug.Assert (tokens [0].Desc == "ANCESTOR");
+			Debug.Assert (tokens [1].Content == "uibutton");
+			Debug.Assert (tokens [1].Desc == "IDENTIFIER");
+
+
+			tokens = lex.Tokenize ("/uibutton");
+
+			Debug.Assert (tokens.Count == 2);
+			Debug.Assert (tokens [0].Content == "/");
+			Debug.Assert (tokens [0].Desc == "CHILD");
+			Debug.Assert (tokens [1].Content == "uibutton");
+			Debug.Assert (tokens [1].Desc == "IDENTIFIER");
+
+			tokens = lex.Tokenize ("//uilabel[3]");
+
+			Debug.Assert (tokens.Count == 5);
+			Debug.Assert (tokens [0].Content == "//");
+			Debug.Assert (tokens [1].Content == "uilabel");
+			Debug.Assert (tokens [2].Content == "[");
+			Debug.Assert (tokens [3].Content == "3");
+			Debug.Assert (tokens [4].Content == "]");
+			Debug.Assert (tokens [2].Desc == "OPEN_PREDICATE");
+			Debug.Assert (tokens [3].Desc == "NUMBER");
+
+
+			tokens = lex.Tokenize ("/ uibutton");
+
+			Debug.Assert (tokens.Count == 3);
+			Debug.Assert (tokens [0].Content == "/");
+			Debug.Assert (tokens [0].Desc == "CHILD");
+			Debug.Assert (tokens [2].Content == "uibutton");
+			Debug.Assert (tokens [1].Content == " ");
+			Debug.Assert (tokens [1].Desc == "WHITE_SPACE");
+			Debug.Assert (tokens [2].Desc == "IDENTIFIER");
+
+			tokens = lex.Tokenize ("//label[@text=\"ceva\"]");
+
+			Debug.Assert (tokens.Count == 7);
+			Debug.Assert (tokens [3].Content == "@text");
+			Debug.Assert (tokens [3].Desc == "ATTRIBUTE");
+			Debug.Assert (tokens [4].Content == "=");
+			Debug.Assert (tokens [4].Desc == "EQUAL");
+			Debug.Assert (tokens [5].Content == "ceva");
+			Debug.Assert (tokens [5].Desc == "STRING");
 		}
 
 		private void ParserTests()
