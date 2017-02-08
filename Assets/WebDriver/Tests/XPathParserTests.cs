@@ -77,7 +77,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			tokens = lex.Tokenize ("//label[@text=\"ceva\"]");
 
 			Debug.Assert (tokens.Count == 7);
-			Debug.Assert (tokens [3].Content == "@text");
+			Debug.Assert (tokens [3].Content == "text");
 			Debug.Assert (tokens [3].Desc == "ATTRIBUTE");
 			Debug.Assert (tokens [4].Content == "=");
 			Debug.Assert (tokens [4].Desc == "EQUAL");
@@ -87,7 +87,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			tokens = lex.Tokenize ("//label[@text=\"ceva\" and @tre=\"23232\"]");
 
 			Debug.Assert (tokens.Count == 13);
-			Debug.Assert (tokens [3].Content == "@text");
+			Debug.Assert (tokens [3].Content == "text");
 			Debug.Assert (tokens [3].Desc == "ATTRIBUTE");
 			Debug.Assert (tokens [4].Content == "=");
 			Debug.Assert (tokens [4].Desc == "EQUAL");
@@ -101,7 +101,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			tokens = lex.Tokenize ("//label[@text=\"ceva\" and @tre=\"23232\" and @rez=\"ultim and\"]");
 
 			Debug.Assert (tokens.Count == 19);
-			Debug.Assert (tokens [3].Content == "@text");
+			Debug.Assert (tokens [3].Content == "text");
 			Debug.Assert (tokens [3].Desc == "ATTRIBUTE");
 			Debug.Assert (tokens [4].Content == "=");
 			Debug.Assert (tokens [4].Desc == "EQUAL");
@@ -113,7 +113,7 @@ namespace tech.ironsheep.WebDriver.Tests
 			Debug.Assert (tokens [11].Desc == "STRING");
 			Debug.Assert (tokens [13].Content == "and");
 			Debug.Assert (tokens [13].Desc == "AND");
-			Debug.Assert (tokens [15].Content == "@rez");
+			Debug.Assert (tokens [15].Content == "rez");
 			Debug.Assert (tokens [15].Desc == "ATTRIBUTE");
 			Debug.Assert (tokens [17].Content == "ultim and");
 			Debug.Assert (tokens [17].Desc == "STRING");
