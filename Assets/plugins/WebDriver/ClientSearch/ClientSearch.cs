@@ -88,14 +88,16 @@ namespace tech.ironsheep.WebDriver.ClientSearch
 
         private static IPAddress GetLocalIP()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip;
-                }
-            }
+			try{
+				using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+				{
+					socket.Connect("8.8.8.8", 65530);
+					IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+					return endPoint.Address;
+				}
+			}
+			catch( Exception e) {
+			}
 
             return null;
         }
