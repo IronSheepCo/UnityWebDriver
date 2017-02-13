@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UnityEngine;
 
 
 namespace tech.ironsheep.WebDriver.ClientSearch
@@ -68,7 +69,14 @@ namespace tech.ironsheep.WebDriver.ClientSearch
             if (broadcastIP == null) return false;
             if (sendingIP == null) return false;
 
-            byte[] magicPacket = Encoding.ASCII.GetBytes("echo for clients");
+            string deviceIdentifier = "";
+
+            if (!SystemInfo.deviceModel.Equals(SystemInfo.unsupportedIdentifier))
+            {
+                deviceIdentifier += "+++" + SystemInfo.deviceModel;
+            }
+
+            byte[] magicPacket = Encoding.ASCII.GetBytes("echo for clients" + deviceIdentifier);
             broadcastSocket.SendTo(magicPacket, magicPacket.Length, SocketFlags.None, sendingIP);
             
             return true;
