@@ -71,9 +71,22 @@ namespace tech.ironsheep.WebDriver.ClientSearch
 
             string deviceIdentifier = "";
 
+            if (!SystemInfo.deviceUniqueIdentifier.Equals(SystemInfo.unsupportedIdentifier))
+            {
+                deviceIdentifier += "+++" + SystemInfo.deviceUniqueIdentifier;
+            }
+            else
+            {
+                deviceIdentifier += "+++" + "default device ID";
+            }
+
             if (!SystemInfo.deviceModel.Equals(SystemInfo.unsupportedIdentifier))
             {
                 deviceIdentifier += "+++" + SystemInfo.deviceModel;
+            }
+            else
+            {
+                deviceIdentifier += "+++" + "default Model";
             }
 
             byte[] magicPacket = Encoding.ASCII.GetBytes("echo for clients" + deviceIdentifier);
