@@ -41,7 +41,7 @@ namespace tech.ironsheep.WebDriver.XPath
 
 				if (name == "UnityEngine" ||
 					name == "UnityEngine.UI" ||
-				   name == "Assembly-CSharp-firstpass") 
+					name == "Assembly-CSharp-firstpass") 
 				{
 					this.assemblies.Add (ass);
 				}
@@ -51,7 +51,7 @@ namespace tech.ironsheep.WebDriver.XPath
 		public List<XPathNode> Parse( string xPath )
 		{
 			List<XPathNode> ret = new List<XPathNode> ();
-			
+
 			//adding // if the path doesn't 
 			if (xPath.StartsWith ("/") == false && xPath.StartsWith ("//") == false) 
 			{
@@ -146,7 +146,7 @@ namespace tech.ironsheep.WebDriver.XPath
 
 								//how to compare
 								if (tokens [currentIndex].Desc == "EQUAL") {
-								
+
 								}
 
 								currentIndex++;
@@ -155,7 +155,7 @@ namespace tech.ironsheep.WebDriver.XPath
 									currentIndex++;
 								}
 
-								attribute.ValueToMatch = tokens [currentIndex].Content;
+								attribute.ValueToMatch = tokens [currentIndex].Content.Replace("\\n","\n");
 
 								currentIndex++;
 
